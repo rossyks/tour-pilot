@@ -206,7 +206,7 @@ function TabInfo({ show, onSaved }) {
     show_duration: '', pantalla_val: '—', pantalla_res: '', realizacion: '—',
     notas: '',
     hotel_name: '', hotel_address: '', hotel_checkin: '', hotel_checkout: '',
-    hotel_tel: '', hotel_habitaciones: '', sort_order: 0,
+    hotel_tel: '', hotel_habitaciones: '', sort_order: 0, card_color: '',
   }
   const [form, setForm] = useState({ ...blank, ...(show || {}) })
   const [dateVal, setDateVal] = useState(parseDateFromShow(show?.day, show?.month))
@@ -260,9 +260,22 @@ function TabInfo({ show, onSaved }) {
         <FieldRow label="Ciudad">
           <input value={form.city} onChange={e => set('city', e.target.value)} placeholder="Madrid, ES" style={inputFull} />
         </FieldRow>
-        <FieldRow label="Orden en lista" last>
+        <FieldRow label="Orden en lista">
           <input value={form.sort_order} onChange={e => set('sort_order', e.target.value)} type="number" style={{ ...inputBase, width: '80px' }} />
         </FieldRow>
+        <div style={{ padding: '10px 14px', borderTop: `0.5px solid ${C.border}` }}>
+          <label style={labelStyle}>Color de tarjeta</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <input type="color" value={form.card_color || '#7C6AF5'} onChange={e => set('card_color', e.target.value)}
+              style={{ width: '48px', height: '48px', borderRadius: '10px', border: `1px solid ${C.border2}`, background: 'none', cursor: 'pointer', padding: '2px' }} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: '12px', color: C.t1, fontWeight: '500', marginBottom: '2px' }}>Vista previa</div>
+              <div style={{ background: form.card_color || '#7C6AF5', borderRadius: '10px', padding: '8px 12px', fontSize: '13px', fontWeight: '700', color: '#fff' }}>
+                {form.day || '—'} {form.month || ''} · {form.title || 'Título del show'}
+              </div>
+            </div>
+          </div>
+        </div>
       </Card>
 
       <Card title="Estado">
