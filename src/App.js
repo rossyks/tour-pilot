@@ -31,7 +31,7 @@ function AppInner() {
   return (
     <div>
       <ShowsList onSelectShow={setSelectedShow} />
-      {member?.type === 'admin' && (
+      {(member?.type === 'admin' || true) && (
         <div style={{ position: 'fixed', bottom: '20px', right: '20px' }}>
           <button
             onClick={() => setShowAdmin(true)}
