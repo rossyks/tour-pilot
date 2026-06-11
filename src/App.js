@@ -7,6 +7,7 @@ import Admin from './components/Admin'
 
 function AppInner() {
   const { user, member, loading } = useAuth()
+  console.log('user:', user, 'member:', member, 'loading:', loading)
   const [selectedShow, setSelectedShow] = useState(null)
   const [showAdmin, setShowAdmin] = useState(false)
 
@@ -31,7 +32,7 @@ function AppInner() {
   return (
     <div>
       <ShowsList onSelectShow={setSelectedShow} />
-      {(member?.type === 'admin' || true) && (
+      {user && (
         <div style={{ position: 'fixed', bottom: '20px', right: '20px' }}>
           <button
             onClick={() => setShowAdmin(true)}
