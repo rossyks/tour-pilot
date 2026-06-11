@@ -21,7 +21,7 @@ function AppInner() {
 
   if (!user) return <Login />
 
-  if (showAdmin && member?.type === 'admin') {
+  if (showAdmin) {
     return <Admin onBack={() => setShowAdmin(false)} />
   }
 
