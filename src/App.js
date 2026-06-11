@@ -33,7 +33,7 @@ function AppInner() {
     <div>
       <ShowsList onSelectShow={setSelectedShow} />
       {user && (
-        <div style={{ position: 'fixed', bottom: '20px', right: '20px' }}>
+        <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 9999 }}>
           <button
             onClick={() => setShowAdmin(true)}
             style={{
