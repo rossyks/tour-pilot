@@ -276,7 +276,7 @@ function TabHotel({ show }) {
     )
   }
 
-  const addr = show.hotel_address
+  const addr = (show.hotel_address && show.hotel_address !== '—' && show.hotel_address !== 'Por confirmar') ? show.hotel_address : null
   const mapsUrl = addr ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}` : null
   const wazeUrl = addr ? `https://waze.com/ul?q=${encodeURIComponent(addr)}&navigate=yes` : null
 
@@ -288,18 +288,19 @@ function TabHotel({ show }) {
         <IRow label="Dirección" value={show.hotel_address || '—'} />
         <IRow label="Check-in" value={show.hotel_checkin || '—'} />
         <IRow label="Check-out" value={show.hotel_checkout || '—'} />
-        <IRow label="Teléfono" value={show.hotel_tel || '—'} link={show.hotel_tel ? `tel:${show.hotel_tel}` : null} last={!addr} />
-        {addr && (
-          <div style={{ display: 'flex', gap: '8px', padding: '10px 12px' }}>
-            <a href={mapsUrl} target="_blank" rel="noopener noreferrer" style={s({ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '9px', background: '#0d1e35', border: '0.5px solid #1a3a60', borderRadius: '8px', textDecoration: 'none', fontSize: '12px', fontWeight: '600', color: '#4a9eff' })}>
-              📍 Google Maps
-            </a>
-            <a href={wazeUrl} target="_blank" rel="noopener noreferrer" style={s({ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '9px', background: '#0a1e30', border: '0.5px solid #1a3a50', borderRadius: '8px', textDecoration: 'none', fontSize: '12px', fontWeight: '600', color: '#33ccff' })}>
-              🗺 Waze
-            </a>
-          </div>
-        )}
+        <IRow label="Teléfono" value={show.hotel_tel || '—'} link={show.hotel_tel ? `tel:${show.hotel_tel}` : null} last />
       </ICard>
+      {addr && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
+          <a href={mapsUrl} target="_blank" rel="noopener noreferrer" style={s({ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '13px 8px', background: '#0d1e35', border: '0.5px solid #1a3a60', borderRadius: '10px', textDecoration: 'none', fontSize: '13px', fontWeight: '600', color: '#4a9eff' })}>
+            📍 Maps
+          </a>
+          <a href={wazeUrl} target="_blank" rel="noopener noreferrer" style={s({ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '13px 8px', background: '#0a1e30', border: '0.5px solid #1a3a50', borderRadius: '10px', textDecoration: 'none', fontSize: '13px', fontWeight: '600', color: '#33ccff' })}>
+            🗺 Waze
+          </a>
+        </div>
+      )}
+
       {show.hotel_habitaciones && (
         <ICard>
           <ICardHeader>Habitaciones</ICardHeader>
