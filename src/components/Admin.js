@@ -313,21 +313,43 @@ function TabInfo({ show, onSaved }) {
       </Card>
 
       <Card title="Hotel">
-        <FieldRow label="Nombre hotel">
-          <input value={form.hotel_name} onChange={e => set('hotel_name', e.target.value)} placeholder="Ibis Madrid Centro" style={inputFull} />
-        </FieldRow>
-        <FieldRow label="Dirección">
-          <input value={form.hotel_address} onChange={e => set('hotel_address', e.target.value)} placeholder="C/ Gran Vía 1, Madrid" style={inputFull} />
-        </FieldRow>
-        <FieldRow label="Teléfono">
-          <input value={form.hotel_tel} onChange={e => set('hotel_tel', e.target.value)} placeholder="+34 91 000 00 00" style={inputFull} />
-        </FieldRow>
-        <FieldRow label="Check-in">
-          <input value={form.hotel_checkin} onChange={e => set('hotel_checkin', e.target.value)} placeholder="14:00" style={{ ...inputBase, width: '100px' }} />
-        </FieldRow>
-        <FieldRow label="Check-out" last>
-          <input value={form.hotel_checkout} onChange={e => set('hotel_checkout', e.target.value)} placeholder="11:00" style={{ ...inputBase, width: '100px' }} />
-        </FieldRow>
+        <div style={{ padding: '12px 14px' }}>
+          <label style={labelStyle}>¿Hay hotel?</label>
+          <ToggleGroup
+            value={form.hotel_name === '__no__' ? 'no' : 'si'}
+            onChange={v => {
+              if (v === 'no') set('hotel_name', '__no__')
+              else set('hotel_name', form.hotel_name === '__no__' ? '' : form.hotel_name)
+            }}
+            options={[{ v: 'si', l: '🏨 Sí, hay hotel' }, { v: 'no', l: '🚗 Misma noche' }]}
+          />
+        </div>
+        {form.hotel_name !== '__no__' && (
+          <>
+            <Divider />
+            <div style={{ padding: '12px 14px' }}>
+              <HotelSearch
+                name={form.hotel_name === '__no__' ? '' : form.hotel_name}
+                city={form.city}
+                onSelect={({ name, address }) => { set('hotel_name', name); set('hotel_address', address) }}
+                onChange={v => set('hotel_name', v)}
+              />
+            </div>
+            <Divider />
+            <FieldRow label="Dirección">
+              <input value={form.hotel_address} onChange={e => set('hotel_address', e.target.value)} placeholder="C/ Gran Vía 1, Madrid" style={inputFull} />
+            </FieldRow>
+            <FieldRow label="Teléfono">
+              <input value={form.hotel_tel} onChange={e => set('hotel_tel', e.target.value)} placeholder="+34 91 000 00 00" style={inputFull} />
+            </FieldRow>
+            <FieldRow label="Check-in">
+              <input value={form.hotel_checkin} onChange={e => set('hotel_checkin', e.target.value)} placeholder="14:00" style={{ ...inputBase, width: '100px' }} />
+            </FieldRow>
+            <FieldRow label="Check-out" last>
+              <input value={form.hotel_checkout} onChange={e => set('hotel_checkout', e.target.value)} placeholder="11:00" style={{ ...inputBase, width: '100px' }} />
+            </FieldRow>
+          </>
+        )}
       </Card>
 
       <Card title="Habitaciones">
@@ -862,6 +884,88 @@ function AdminMembers({ members, onRefresh, onFlash }) {
           <Ico onClick={() => del(m.id)} red>✕</Ico>
         </div>
       ))}
+    </div>
+  )
+}
+
+// ── Hotel Search (Nominatim) ─────────────────────────────────
+
+function HotelSearch({ name, city, onSelect, onChange }) {
+  const [query, setQuery] = useState(name || '')
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [open, setOpen] = useState(false)
+  const timer = useRef(null)
+
+  useEffect(() => { setQuery(name || '') }, [name])
+
+  function handleChange(e) {
+    const val = e.target.value
+    setQuery(val)
+    onChange(val)
+    clearTimeout(timer.current)
+    if (val.length < 3) { setResults([]); setOpen(false); return }
+    timer.current = setTimeout(() => search(val), 450)
+  }
+
+  async function search(q) {
+    setLoading(true)
+    try {
+      const cityHint = city ? ` ${city.split(',')[0]}` : ''
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q + cityHint)}&format=json&addressdetails=1&limit=6&accept-language=es&countrycodes=es,ar,mx,co,cl,pe,uy,py,bo,ec,ve,gt,hn,sv,ni,cr,pa,cu,do,pr`
+      const res = await fetch(url, { headers: { 'Accept-Language': 'es' } })
+      const data = await res.json()
+      setResults(data.filter(r => r.display_name))
+      setOpen(true)
+    } catch {}
+    setLoading(false)
+  }
+
+  function select(r) {
+    const parts = r.display_name.split(',')
+    const hotelName = parts[0].trim()
+    const address = parts.slice(1, 4).map(s => s.trim()).filter(Boolean).join(', ')
+    onSelect({ name: hotelName, address })
+    setQuery(hotelName)
+    setResults([])
+    setOpen(false)
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <label style={labelStyle}>Buscar hotel</label>
+      <div style={{ position: 'relative' }}>
+        <input
+          value={query}
+          onChange={handleChange}
+          onFocus={() => results.length && setOpen(true)}
+          placeholder="Escribe el nombre del hotel..."
+          style={{ ...inputFull, paddingRight: '30px' }}
+        />
+        {loading && (
+          <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '11px', color: C.t3 }}>⏳</span>
+        )}
+      </div>
+      {open && results.length > 0 && (
+        <div style={{ position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, background: C.bg2, border: `1px solid ${C.border2}`, borderRadius: '10px', zIndex: 500, overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,.4)' }}>
+          {results.map((r, i) => {
+            const parts = r.display_name.split(',')
+            const title = parts[0].trim()
+            const sub = parts.slice(1, 4).map(s => s.trim()).filter(Boolean).join(', ')
+            return (
+              <div key={i} onClick={() => select(r)} style={{ padding: '10px 14px', cursor: 'pointer', borderBottom: i < results.length - 1 ? `0.5px solid ${C.border}` : 'none' }}
+                onMouseEnter={e => e.currentTarget.style.background = C.bg3}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                <div style={{ fontSize: '13px', fontWeight: '500', color: C.t1 }}>{title}</div>
+                <div style={{ fontSize: '11px', color: C.t2, marginTop: '2px' }}>{sub}</div>
+              </div>
+            )
+          })}
+          <div style={{ padding: '7px 14px', fontSize: '10px', color: C.t3, borderTop: `0.5px solid ${C.border}` }}>
+            Datos: © OpenStreetMap
+          </div>
+        </div>
+      )}
     </div>
   )
 }

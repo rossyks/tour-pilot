@@ -262,6 +262,24 @@ function TabHorarios({ items }) {
 }
 
 function TabHotel({ show }) {
+  const noHotel = show.hotel_name === '__no__'
+
+  if (noHotel) {
+    return (
+      <ICard>
+        <div style={s({ padding: '18px 14px', textAlign: 'center' })}>
+          <div style={{ fontSize: '28px', marginBottom: '8px' }}>🚗</div>
+          <div style={s({ fontSize: '14px', fontWeight: '500', color: '#eef2f7' })}>Misma noche</div>
+          <div style={s({ fontSize: '12px', color: '#7a8fa8', marginTop: '4px' })}>No hay hotel para este show</div>
+        </div>
+      </ICard>
+    )
+  }
+
+  const addr = show.hotel_address
+  const mapsUrl = addr ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}` : null
+  const wazeUrl = addr ? `https://waze.com/ul?q=${encodeURIComponent(addr)}&navigate=yes` : null
+
   return (
     <>
       <ICard>
@@ -270,7 +288,17 @@ function TabHotel({ show }) {
         <IRow label="Dirección" value={show.hotel_address || '—'} />
         <IRow label="Check-in" value={show.hotel_checkin || '—'} />
         <IRow label="Check-out" value={show.hotel_checkout || '—'} />
-        <IRow label="Teléfono" value={show.hotel_tel || '—'} link={show.hotel_tel} last />
+        <IRow label="Teléfono" value={show.hotel_tel || '—'} link={show.hotel_tel ? `tel:${show.hotel_tel}` : null} last={!addr} />
+        {addr && (
+          <div style={{ display: 'flex', gap: '8px', padding: '10px 12px' }}>
+            <a href={mapsUrl} target="_blank" rel="noopener noreferrer" style={s({ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '9px', background: '#0d1e35', border: '0.5px solid #1a3a60', borderRadius: '8px', textDecoration: 'none', fontSize: '12px', fontWeight: '600', color: '#4a9eff' })}>
+              📍 Google Maps
+            </a>
+            <a href={wazeUrl} target="_blank" rel="noopener noreferrer" style={s({ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '9px', background: '#0a1e30', border: '0.5px solid #1a3a50', borderRadius: '8px', textDecoration: 'none', fontSize: '12px', fontWeight: '600', color: '#33ccff' })}>
+              🗺 Waze
+            </a>
+          </div>
+        )}
       </ICard>
       {show.hotel_habitaciones && (
         <ICard>
