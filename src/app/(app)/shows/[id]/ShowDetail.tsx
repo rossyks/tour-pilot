@@ -188,12 +188,12 @@ function VenueAddressSheet({ open, onClose, onSave }: {
   return createPortal(
     <>
       <div onClick={handleClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }} />
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px', maxHeight: '80vh', overflowY: 'auto', zIndex: 9999, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px', maxHeight: '50vh', overflowY: 'auto', zIndex: 9999, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
         <p style={{ fontWeight: 700, fontSize: 15, margin: '0 0 14px 0', fontFamily: SYS }}>Editar dirección</p>
         <input
           autoFocus value={query} onChange={e => handleChange(e.target.value)}
           placeholder="Buscar dirección…"
-          style={{ width: '100%', background: '#F5F5F5', border: 'none', borderRadius: 12, padding: '12px 14px', fontSize: 15, fontFamily: SYS, outline: 'none', marginBottom: results.length ? 8 : 0, boxSizing: 'border-box' }}
+          style={{ width: '100%', background: '#F5F5F5', border: 'none', borderRadius: 12, padding: '12px 14px', fontSize: 16, fontFamily: SYS, outline: 'none', marginBottom: results.length ? 8 : 0, boxSizing: 'border-box' }}
         />
         {results.length > 0 && (
           <div style={{ background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 14, overflow: 'hidden' }}>
@@ -206,6 +206,7 @@ function VenueAddressSheet({ open, onClose, onSave }: {
             ))}
           </div>
         )}
+        <button onClick={handleClose} style={{ width: '100%', background: 'none', border: 'none', fontSize: 15, color: '#999', cursor: 'pointer', marginTop: 12, padding: '8px 0', fontFamily: SYS, textAlign: 'center' }}>Cancelar</button>
       </div>
     </>,
     document.body
@@ -495,11 +496,11 @@ function SchedLocationSheet({ open, onClose, onSave }: {
   return createPortal(
     <>
       <div onClick={handleClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }} />
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px', maxHeight: '80vh', overflowY: 'auto', zIndex: 9999, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px', maxHeight: '50vh', overflowY: 'auto', zIndex: 9999, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
         <p style={{ fontWeight: 700, fontSize: 15, margin: '0 0 14px 0', fontFamily: SYS }}>Añadir dirección</p>
         <input autoFocus value={query} onChange={e => handleChange(e.target.value)}
           placeholder="Buscar dirección…"
-          style={{ width: '100%', background: '#F5F5F5', border: 'none', borderRadius: 12, padding: '12px 14px', fontSize: 15, fontFamily: SYS, outline: 'none', marginBottom: results.length ? 8 : 0, boxSizing: 'border-box' }} />
+          style={{ width: '100%', background: '#F5F5F5', border: 'none', borderRadius: 12, padding: '12px 14px', fontSize: 16, fontFamily: SYS, outline: 'none', marginBottom: results.length ? 8 : 0, boxSizing: 'border-box' }} />
         {results.length > 0 && (
           <div style={{ background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 14, overflow: 'hidden' }}>
             {results.map((r, i) => (
@@ -511,6 +512,7 @@ function SchedLocationSheet({ open, onClose, onSave }: {
             ))}
           </div>
         )}
+        <button onClick={handleClose} style={{ width: '100%', background: 'none', border: 'none', fontSize: 15, color: '#999', cursor: 'pointer', marginTop: 12, padding: '8px 0', fontFamily: SYS, textAlign: 'center' }}>Cancelar</button>
       </div>
     </>,
     document.body
