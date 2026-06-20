@@ -182,16 +182,18 @@ function VenueAddressSheet({ open, onClose, onSave }: {
 
   function handleClose() { setQuery(''); setResults([]); onClose() }
 
-  if (!open) return null
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200 }}>
-      <div onClick={handleClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }} />
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '20px 20px 36px' }}>
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  if (!open || !mounted) return null
+  return createPortal(
+    <>
+      <div onClick={handleClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }} />
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px', maxHeight: '80vh', overflowY: 'auto', zIndex: 9999, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
         <p style={{ fontWeight: 700, fontSize: 15, margin: '0 0 14px 0', fontFamily: SYS }}>Editar dirección</p>
         <input
           autoFocus value={query} onChange={e => handleChange(e.target.value)}
           placeholder="Buscar dirección…"
-          style={{ width: '100%', background: '#F5F5F5', border: 'none', borderRadius: 12, padding: '12px 14px', fontSize: 15, fontFamily: SYS, outline: 'none', marginBottom: results.length ? 8 : 0 }}
+          style={{ width: '100%', background: '#F5F5F5', border: 'none', borderRadius: 12, padding: '12px 14px', fontSize: 15, fontFamily: SYS, outline: 'none', marginBottom: results.length ? 8 : 0, boxSizing: 'border-box' }}
         />
         {results.length > 0 && (
           <div style={{ background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 14, overflow: 'hidden' }}>
@@ -205,7 +207,8 @@ function VenueAddressSheet({ open, onClose, onSave }: {
           </div>
         )}
       </div>
-    </div>
+    </>,
+    document.body
   )
 }
 
@@ -276,11 +279,13 @@ function ContactsSheet({ open, onClose, contacts, isAdmin, showId, onAdd, onDele
 
   function handleClose() { setPendingDelete(null); setAdding(false); setForm({ name: '', role: '', phone: '', email: '' }); onClose() }
 
-  if (!open) return null
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 100 }}>
-      <div onClick={handleClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }} />
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '20px 20px 36px' }}>
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  if (!open || !mounted) return null
+  return createPortal(
+    <>
+      <div onClick={handleClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }} />
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px', maxHeight: '80vh', overflowY: 'auto', zIndex: 9999, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
         <p style={{ fontWeight: 700, fontSize: 16, margin: '0 0 16px 0', fontFamily: SYS }}>Contactos</p>
 
         {contacts.length === 0 && !adding && (
@@ -340,7 +345,8 @@ function ContactsSheet({ open, onClose, contacts, isAdmin, showId, onAdd, onDele
           Cancelar
         </button>
       </div>
-    </div>
+    </>,
+    document.body
   )
 }
 
@@ -396,11 +402,13 @@ function HotelEditSheet({ open, onClose, initialName, initialPhone, onSave }: {
     setSaving(false)
   }
 
-  if (!open) return null
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200 }}>
-      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }} />
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '20px 20px 36px' }}>
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  if (!open || !mounted) return null
+  return createPortal(
+    <>
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }} />
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px', maxHeight: '80vh', overflowY: 'auto', zIndex: 9999, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
         <p style={{ fontWeight: 700, fontSize: 16, margin: '0 0 14px 0', fontFamily: SYS }}>Editar hotel</p>
 
         {/* Search */}
@@ -408,7 +416,7 @@ function HotelEditSheet({ open, onClose, initialName, initialPhone, onSave }: {
           <p style={{ fontSize: 11, color: '#999', margin: '0 0 4px 0', fontFamily: SYS }}>Nombre del hotel</p>
           <input autoFocus value={query} onChange={e => handleChange(e.target.value)}
             placeholder="Buscar hotel…"
-            style={{ width: '100%', background: '#F5F5F5', border: 'none', borderRadius: 12, padding: '12px 14px', fontSize: 15, fontFamily: SYS, outline: 'none' }} />
+            style={{ width: '100%', background: '#F5F5F5', border: 'none', borderRadius: 12, padding: '12px 14px', fontSize: 15, fontFamily: SYS, outline: 'none', boxSizing: 'border-box' }} />
           {results.length > 0 && (
             <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 14, overflow: 'hidden', zIndex: 10, marginTop: 4 }}>
               {results.map((r, i) => (
@@ -427,7 +435,7 @@ function HotelEditSheet({ open, onClose, initialName, initialPhone, onSave }: {
           <p style={{ fontSize: 11, color: '#999', margin: '0 0 4px 0', fontFamily: SYS }}>Teléfono del hotel</p>
           <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
             placeholder="+34 600 000 000"
-            style={{ width: '100%', background: '#F5F5F5', border: 'none', borderRadius: 12, padding: '12px 14px', fontSize: 15, fontFamily: SYS, outline: 'none' }} />
+            style={{ width: '100%', background: '#F5F5F5', border: 'none', borderRadius: 12, padding: '12px 14px', fontSize: 15, fontFamily: SYS, outline: 'none', boxSizing: 'border-box' }} />
         </div>
 
         <div style={{ display: 'flex', gap: 10 }}>
@@ -441,7 +449,8 @@ function HotelEditSheet({ open, onClose, initialName, initialPhone, onSave }: {
           </button>
         </div>
       </div>
-    </div>
+    </>,
+    document.body
   )
 }
 
@@ -480,15 +489,17 @@ function SchedLocationSheet({ open, onClose, onSave }: {
 
   function handleClose() { setQuery(''); setResults([]); onClose() }
 
-  if (!open) return null
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200 }}>
-      <div onClick={handleClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }} />
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '20px 20px 36px' }}>
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  if (!open || !mounted) return null
+  return createPortal(
+    <>
+      <div onClick={handleClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }} />
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px', maxHeight: '80vh', overflowY: 'auto', zIndex: 9999, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
         <p style={{ fontWeight: 700, fontSize: 15, margin: '0 0 14px 0', fontFamily: SYS }}>Añadir dirección</p>
         <input autoFocus value={query} onChange={e => handleChange(e.target.value)}
           placeholder="Buscar dirección…"
-          style={{ width: '100%', background: '#F5F5F5', border: 'none', borderRadius: 12, padding: '12px 14px', fontSize: 15, fontFamily: SYS, outline: 'none', marginBottom: results.length ? 8 : 0 }} />
+          style={{ width: '100%', background: '#F5F5F5', border: 'none', borderRadius: 12, padding: '12px 14px', fontSize: 15, fontFamily: SYS, outline: 'none', marginBottom: results.length ? 8 : 0, boxSizing: 'border-box' }} />
         {results.length > 0 && (
           <div style={{ background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 14, overflow: 'hidden' }}>
             {results.map((r, i) => (
@@ -501,7 +512,8 @@ function SchedLocationSheet({ open, onClose, onSave }: {
           </div>
         )}
       </div>
-    </div>
+    </>,
+    document.body
   )
 }
 
