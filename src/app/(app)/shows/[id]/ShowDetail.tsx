@@ -10,6 +10,11 @@ import { useScrollLock } from '@/lib/useScrollLock'
 
 const SYS = "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif"
 
+function normalizeUrl(url: string) {
+  if (!url.startsWith('http://') && !url.startsWith('https://')) return 'https://' + url
+  return url
+}
+
 
 
 function fmt(d: string) {
@@ -243,10 +248,10 @@ function DocRow({ doc, isAdmin, onDelete, onDragStart, onDragOver, onDrop, force
           style={{ color: 'rgba(0,0,0,0.25)', fontSize: 13, cursor: 'grab', userSelect: 'none', flexShrink: 0, touchAction: 'none' }}
         >≡</span>
       )}
-      <a href={doc.url ?? '#'} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', flex: 1, minWidth: 0 }}>
+      <a href={doc.url ? normalizeUrl(doc.url) : '#'} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#F5F5F5', borderRadius: 8, padding: '8px 10px' }}>
-          <span style={{ fontSize: 16, flexShrink: 0, lineHeight: 1, color: isPdf ? '#999' : '#007AFF' }}>{isPdf ? '📄' : '🔗'}</span>
-          <span style={{ fontSize: 12, fontWeight: 500, color: '#1a1a1a', fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+          <span style={{ fontSize: 16, flexShrink: 0, lineHeight: 1, color: '#007AFF' }}>{isPdf ? '📄' : '🔗'}</span>
+          <span style={{ fontSize: 12, fontWeight: 500, color: isPdf ? '#1a1a1a' : '#007AFF', fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
             {trunc(doc.label)}
           </span>
         </div>
@@ -756,8 +761,9 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
     e.preventDefault()
     if (!newLink.url) return
     const idx = riderDocs.length
+    const url = normalizeUrl(newLink.url)
     const { data: row } = await supabase.from('documents')
-      .insert({ show_id: data.id, type: 'rider', label: newLink.label || newLink.url, url: newLink.url, order_index: idx })
+      .insert({ show_id: data.id, type: 'rider', label: newLink.label || url, url, order_index: idx })
       .select().single()
     if (row) setDocs(d => [...d, row])
     setAddingLink(false); setNewLink({ label: '', url: '' })
@@ -1179,10 +1185,10 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
             {visibleTicketDocs.length === 0 && !isAdmin && <p style={{ fontSize: 14, color: '#C0C0C0', margin: 0 }}>—</p>}
             {visibleTicketDocs.map(doc => (
               <div key={doc.id} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <a href={doc.url ?? '#'} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', flex: 1, minWidth: 0 }}>
+                <a href={doc.url ? normalizeUrl(doc.url) : '#'} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#F5F5F5', borderRadius: 8, padding: '8px 10px' }}>
-                    <span style={{ fontSize: 16, flexShrink: 0, lineHeight: 1, color: '#999' }}>📄</span>
-                    <span style={{ fontSize: 12, fontWeight: 500, color: '#1a1a1a', fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{doc.label || 'Billete'}</span>
+                    <span style={{ fontSize: 16, flexShrink: 0, lineHeight: 1, color: '#007AFF' }}>📄</span>
+                    <span style={{ fontSize: 12, fontWeight: 500, color: '#007AFF', fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{doc.label || 'Billete'}</span>
                   </div>
                 </a>
                 {isAdmin && (
@@ -1602,7 +1608,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
             {setlistDocs.length === 0 && !isAdmin && <p style={{ fontSize: 14, color: '#C0C0C0', margin: 0 }}>—</p>}
             {setlistDocs.map(doc => (
               <div key={doc.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <a href={doc.url ?? '#'} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14, fontWeight: 500, color: '#1a1a1a', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: SYS }}>{doc.label || 'Setlist'}</a>
+                <a href={doc.url ? normalizeUrl(doc.url) : '#'} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14, fontWeight: 500, color: '#007AFF', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: SYS, textDecoration: 'none' }}>{doc.label || 'Setlist'}</a>
                 {isAdmin && <button onClick={() => deleteDoc(doc.id)} style={{ color: '#C0C0C0', fontSize: 13, minWidth: 32, minHeight: 32, background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>}
               </div>
             ))}
