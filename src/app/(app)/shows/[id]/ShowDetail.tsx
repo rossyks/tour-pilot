@@ -183,13 +183,17 @@ function VenueAddressSheet({ open, onClose, onSave }: {
   function handleClose() { setQuery(''); setResults([]); onClose() }
 
   const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const [isDesktop, setIsDesktop] = useState(false)
+  useEffect(() => { setMounted(true); setIsDesktop(window.innerWidth > 768) }, [])
   if (!open || !mounted) return null
+  const panelStyle: React.CSSProperties = isDesktop
+    ? { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 480, background: '#fff', borderRadius: 16, padding: '24px 20px 32px', maxHeight: '80vh', overflowY: 'auto', zIndex: 9999 }
+    : { position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px 32px', minHeight: 200, maxHeight: '60vh', overflowY: 'auto', zIndex: 9999, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }
   return createPortal(
     <>
       <div onClick={handleClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }} />
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px', maxHeight: '50vh', overflowY: 'auto', zIndex: 9999, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
-        <p style={{ fontWeight: 700, fontSize: 15, margin: '0 0 14px 0', fontFamily: SYS }}>Editar dirección</p>
+      <div style={panelStyle}>
+        <p style={{ fontWeight: 700, fontSize: 18, margin: '0 0 14px 0', fontFamily: SYS }}>Editar dirección</p>
         <input
           autoFocus value={query} onChange={e => handleChange(e.target.value)}
           placeholder="Buscar dirección…"
@@ -199,14 +203,14 @@ function VenueAddressSheet({ open, onClose, onSave }: {
           <div style={{ background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 14, overflow: 'hidden' }}>
             {results.map((r, i) => (
               <button key={i} onClick={() => !saving && select(r)}
-                style={{ width: '100%', textAlign: 'left', padding: '12px 14px', background: 'none', border: 'none', borderBottom: i < results.length - 1 ? '0.5px solid #F0F0F0' : 'none', cursor: 'pointer', fontFamily: SYS, minHeight: 48, opacity: saving ? 0.5 : 1 }}>
+                style={{ width: '100%', textAlign: 'left', padding: '12px 14px', background: 'none', border: 'none', borderBottom: i < results.length - 1 ? '0.5px solid #F0F0F0' : 'none', cursor: 'pointer', fontFamily: SYS, minHeight: 44, opacity: saving ? 0.5 : 1 }}>
                 <p style={{ fontSize: 14, fontWeight: 500, color: '#1a1a1a', margin: '0 0 1px 0', lineHeight: 1.3 }}>{r.display_name.split(',')[0]}</p>
                 <p style={{ fontSize: 12, color: '#999', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.display_name.split(',').slice(1, 4).join(',').trim()}</p>
               </button>
             ))}
           </div>
         )}
-        <button onClick={handleClose} style={{ width: '100%', background: 'none', border: 'none', fontSize: 15, color: '#999', cursor: 'pointer', marginTop: 12, padding: '8px 0', fontFamily: SYS, textAlign: 'center' }}>Cancelar</button>
+        <button onClick={handleClose} style={{ width: '100%', background: 'none', border: 'none', fontSize: 15, color: '#999', cursor: 'pointer', marginTop: 12, padding: '12px 0', fontFamily: SYS, textAlign: 'center' }}>Cancelar</button>
       </div>
     </>,
     document.body
@@ -491,13 +495,17 @@ function SchedLocationSheet({ open, onClose, onSave }: {
   function handleClose() { setQuery(''); setResults([]); onClose() }
 
   const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
+  const [isDesktop, setIsDesktop] = useState(false)
+  useEffect(() => { setMounted(true); setIsDesktop(window.innerWidth > 768) }, [])
   if (!open || !mounted) return null
+  const panelStyle: React.CSSProperties = isDesktop
+    ? { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 480, background: '#fff', borderRadius: 16, padding: '24px 20px 32px', maxHeight: '80vh', overflowY: 'auto', zIndex: 9999 }
+    : { position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px 32px', minHeight: 200, maxHeight: '60vh', overflowY: 'auto', zIndex: 9999, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }
   return createPortal(
     <>
       <div onClick={handleClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }} />
-      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px', maxHeight: '50vh', overflowY: 'auto', zIndex: 9999, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
-        <p style={{ fontWeight: 700, fontSize: 15, margin: '0 0 14px 0', fontFamily: SYS }}>Añadir dirección</p>
+      <div style={panelStyle}>
+        <p style={{ fontWeight: 700, fontSize: 18, margin: '0 0 14px 0', fontFamily: SYS }}>Añadir dirección</p>
         <input autoFocus value={query} onChange={e => handleChange(e.target.value)}
           placeholder="Buscar dirección…"
           style={{ width: '100%', background: '#F5F5F5', border: 'none', borderRadius: 12, padding: '12px 14px', fontSize: 16, fontFamily: SYS, outline: 'none', marginBottom: results.length ? 8 : 0, boxSizing: 'border-box' }} />
@@ -505,14 +513,14 @@ function SchedLocationSheet({ open, onClose, onSave }: {
           <div style={{ background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 14, overflow: 'hidden' }}>
             {results.map((r, i) => (
               <button key={i} onClick={() => !saving && select(r)}
-                style={{ width: '100%', textAlign: 'left', padding: '12px 14px', background: 'none', border: 'none', borderBottom: i < results.length - 1 ? '0.5px solid #F0F0F0' : 'none', cursor: 'pointer', fontFamily: SYS, minHeight: 48, opacity: saving ? 0.5 : 1 }}>
+                style={{ width: '100%', textAlign: 'left', padding: '12px 14px', background: 'none', border: 'none', borderBottom: i < results.length - 1 ? '0.5px solid #F0F0F0' : 'none', cursor: 'pointer', fontFamily: SYS, minHeight: 44, opacity: saving ? 0.5 : 1 }}>
                 <p style={{ fontSize: 14, fontWeight: 500, color: '#1a1a1a', margin: '0 0 1px 0', lineHeight: 1.3 }}>{r.display_name.split(',')[0]}</p>
                 <p style={{ fontSize: 12, color: '#999', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.display_name.split(',').slice(1, 4).join(',').trim()}</p>
               </button>
             ))}
           </div>
         )}
-        <button onClick={handleClose} style={{ width: '100%', background: 'none', border: 'none', fontSize: 15, color: '#999', cursor: 'pointer', marginTop: 12, padding: '8px 0', fontFamily: SYS, textAlign: 'center' }}>Cancelar</button>
+        <button onClick={handleClose} style={{ width: '100%', background: 'none', border: 'none', fontSize: 15, color: '#999', cursor: 'pointer', marginTop: 12, padding: '12px 0', fontFamily: SYS, textAlign: 'center' }}>Cancelar</button>
       </div>
     </>,
     document.body
