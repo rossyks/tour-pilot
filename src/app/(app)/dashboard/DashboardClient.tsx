@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Tour, TOUR_COLORS } from '@/lib/types'
+import { useScrollLock } from '@/lib/useScrollLock'
 
 const SYS = "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif"
 
@@ -198,6 +199,8 @@ export default function DashboardClient({
   const [deleteTarget, setDeleteTarget] = useState<Tour | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [joinSuccess, setJoinSuccess] = useState<string | null>(null)
+
+  useScrollLock(sheetOpen || joinOpen || !!deleteTarget)
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()

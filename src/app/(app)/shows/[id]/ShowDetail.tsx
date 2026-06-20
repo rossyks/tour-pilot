@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Show, Contact, ScheduleItem, Document, NoteAttachment, TravelDay, TourMember, TicketVisibility, ScheduleVisibility } from '@/lib/types'
+import { useScrollLock } from '@/lib/useScrollLock'
 
 const SYS = "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif"
 
@@ -26,6 +27,7 @@ function trunc(s: string | null, n = 20) {
 // ─── Bottom Sheet ─────────────────────────────────────────────────────────────
 
 function BottomSheet({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode; zIndex?: number }) {
+  useScrollLock(open)
   const [mounted, setMounted] = useState(false)
   useEffect(() => { setMounted(true) }, [])
 
@@ -182,6 +184,7 @@ function VenueAddressSheet({ open, onClose, onSave }: {
 
   function handleClose() { setQuery(''); setResults([]); onClose() }
 
+  useScrollLock(open)
   const [mounted, setMounted] = useState(false)
   useEffect(() => { setMounted(true) }, [])
   if (!open || !mounted) return null
@@ -286,6 +289,7 @@ function ContactsSheet({ open, onClose, contacts, isAdmin, showId, onAdd, onDele
 
   function handleClose() { setPendingDelete(null); setAdding(false); setForm({ name: '', role: '', phone: '', email: '' }); onClose() }
 
+  useScrollLock(open)
   const [mounted, setMounted] = useState(false)
   useEffect(() => { setMounted(true) }, [])
   if (!open || !mounted) return null
@@ -409,6 +413,7 @@ function HotelEditSheet({ open, onClose, initialName, initialPhone, onSave }: {
     setSaving(false)
   }
 
+  useScrollLock(open)
   const [mounted, setMounted] = useState(false)
   useEffect(() => { setMounted(true) }, [])
   if (!open || !mounted) return null
@@ -496,6 +501,7 @@ function SchedLocationSheet({ open, onClose, onSave }: {
 
   function handleClose() { setQuery(''); setResults([]); onClose() }
 
+  useScrollLock(open)
   const [mounted, setMounted] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
   useEffect(() => { setMounted(true); setIsDesktop(window.innerWidth > 768) }, [])

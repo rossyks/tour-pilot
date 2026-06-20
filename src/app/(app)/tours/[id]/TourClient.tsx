@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Show, TravelDay, TourMember, TOUR_COLORS } from '@/lib/types'
+import { useScrollLock } from '@/lib/useScrollLock'
 
 const SYS = "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif"
 
@@ -150,6 +151,8 @@ export default function TourClient({
   const [transferSheet, setTransferSheet] = useState(false)
   const [confirmTransfer, setConfirmTransfer] = useState<{ memberId: string; name: string } | null>(null)
   const [teamError, setTeamError] = useState<string | null>(null)
+
+  useScrollLock(sheetOpen || teamSheetOpen || transferSheet || !!confirmRoleChange || !!confirmRemove || !!confirmTransfer)
   const [form, setForm] = useState({
     venue_name: '', city: '', date: '', show_time: '', soundcheck_time: '',
   })

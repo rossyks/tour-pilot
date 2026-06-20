@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { TravelDay, TravelScheduleItem, TravelDocument, TOUR_COLORS } from '@/lib/types'
+import { useScrollLock } from '@/lib/useScrollLock'
 
 const SYS = "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif"
 
@@ -102,6 +103,7 @@ export default function TravelClient({
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [editingMap, setEditingMap] = useState<Record<string, Partial<TravelScheduleItem>>>({})
   const [addingSched, setAddingSched] = useState(false)
+  useScrollLock(confirmDelete || addingSched)
   const [newSched, setNewSched] = useState({ time_start: '', time_end: '', title: '', subtitle: '' })
 
   const [addingLink, setAddingLink] = useState(false)
