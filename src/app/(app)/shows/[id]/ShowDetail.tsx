@@ -681,7 +681,11 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
   const [expandedSchedId, setExpandedSchedId] = useState<string | null>(null)
   const [editingSchedMap, setEditingSchedMap] = useState<Record<string, Partial<ScheduleItem>>>({})
   const [addingSched, setAddingSched] = useState(false)
-  const [newSched, setNewSched] = useState({ time_start: '', time_end: '', title: '', subtitle: '' })
+  const [newSched, setNewSched] = useState({ time_start: '', time_end: '', title: '', subtitle: '', contact_id: null as string | null, location_address: null as string | null, location_lat: null as number | null, location_lng: null as number | null })
+  const [newSchedPanel, setNewSchedPanel] = useState<'none' | 'contact' | 'address'>('none')
+  const [newSchedAddrQuery, setNewSchedAddrQuery] = useState('')
+  const [newSchedAddrResults, setNewSchedAddrResults] = useState<{ display_name: string; lat: string; lon: string }[]>([])
+  const newSchedAddrTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [schedLocSheet, setSchedLocSheet] = useState<string | null>(null)   // item id: open Nominatim picker
   const [schedMapSheet, setSchedMapSheet] = useState<string | null>(null)   // item id: open maps chooser
   const [schedContactSheet, setSchedContactSheet] = useState<string | null>(null)
@@ -707,10 +711,21 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
     e.preventDefault()
     if (!newSched.time_start || !newSched.title) return
     const { data: row } = await supabase.from('schedule_items').insert({
-      show_id: data.id, ...newSched, time_end: newSched.time_end || null, subtitle: newSched.subtitle || null, order_index: schedule.length,
+      show_id: data.id,
+      time_start: newSched.time_start,
+      time_end: newSched.time_end || null,
+      title: newSched.title,
+      subtitle: newSched.subtitle || null,
+      contact_id: newSched.contact_id,
+      location_address: newSched.location_address,
+      location_lat: newSched.location_lat,
+      location_lng: newSched.location_lng,
+      order_index: schedule.length,
     }).select().single()
     if (row) setSchedule(s => [...s, row].sort((a, b) => a.time_start.localeCompare(b.time_start)))
-    setAddingSched(false); setNewSched({ time_start: '', time_end: '', title: '', subtitle: '' })
+    setAddingSched(false)
+    setNewSched({ time_start: '', time_end: '', title: '', subtitle: '', contact_id: null, location_address: null, location_lat: null, location_lng: null })
+    setNewSchedPanel('none'); setNewSchedAddrQuery(''); setNewSchedAddrResults([])
   }
   async function deleteSched(id: string) {
     await supabase.from('schedule_items').delete().eq('id', id)
@@ -1413,18 +1428,18 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
 
         {/* Add form — outside timeline so the vertical line doesn't cross it */}
         {addingSched && (
-          <form onSubmit={saveSched} style={{ background: '#F5F5F5', borderRadius: 16, padding: 16, margin: '8px 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <form onSubmit={saveSched} style={{ background: '#F5F5F5', borderRadius: 16, padding: 16, margin: '8px 0', display: 'flex', flexDirection: 'column', gap: 12, width: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
             {/* Row 1 — Inicio / Fin */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, width: '100%', boxSizing: 'border-box' }}>
+              <div style={{ minWidth: 0 }}>
                 <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', margin: '0 0 6px 0', fontFamily: SYS }}>Inicio</p>
                 <input type="time" value={newSched.time_start} onChange={e => setNewSched(s => ({ ...s, time_start: e.target.value }))} required
-                  style={{ height: 44, width: '100%', background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 10, padding: '0 12px', fontSize: 16, fontFamily: SYS, outline: 'none', boxSizing: 'border-box' }} />
+                  style={{ height: 44, width: '100%', background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 10, padding: '0 10px', fontSize: 16, fontFamily: SYS, outline: 'none', boxSizing: 'border-box', WebkitAppearance: 'none' }} />
               </div>
-              <div>
+              <div style={{ minWidth: 0 }}>
                 <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', margin: '0 0 6px 0', fontFamily: SYS }}>Fin</p>
                 <input type="time" value={newSched.time_end} onChange={e => setNewSched(s => ({ ...s, time_end: e.target.value }))}
-                  style={{ height: 44, width: '100%', background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 10, padding: '0 12px', fontSize: 16, fontFamily: SYS, outline: 'none', boxSizing: 'border-box' }} />
+                  style={{ height: 44, width: '100%', background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 10, padding: '0 10px', fontSize: 16, fontFamily: SYS, outline: 'none', boxSizing: 'border-box', WebkitAppearance: 'none' }} />
               </div>
             </div>
             {/* Row 2 — Título */}
@@ -1436,12 +1451,84 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
             {/* Row 3 — Subtítulo */}
             <div>
               <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', margin: '0 0 6px 0', fontFamily: SYS }}>Subtítulo</p>
-              <input type="text" placeholder="Dirección, nota o detalle opcional" value={newSched.subtitle} onChange={e => setNewSched(s => ({ ...s, subtitle: e.target.value }))}
+              <input type="text" placeholder="Nota o detalle opcional" value={newSched.subtitle} onChange={e => setNewSched(s => ({ ...s, subtitle: e.target.value }))}
                 style={{ height: 44, width: '100%', background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 10, padding: '0 12px', fontSize: 16, fontFamily: SYS, outline: 'none', boxSizing: 'border-box' }} />
             </div>
-            {/* Row 4 — Botones */}
+            {/* Selected contact / address preview */}
+            {newSched.contact_id && (() => { const c = contacts.find(x => x.id === newSched.contact_id); return c ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 13, color: '#1a1a1a', fontFamily: SYS }}>👤 {c.name}{c.role ? ` · ${c.role}` : ''}</span>
+                <button type="button" onClick={() => setNewSched(s => ({ ...s, contact_id: null }))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#C0C0C0', fontSize: 13, padding: 0 }}>✕</button>
+              </div>
+            ) : null })()}
+            {newSched.location_address && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 13, color: '#007AFF', fontFamily: SYS }}>📍 {newSched.location_address.split(',')[0]}</span>
+                <button type="button" onClick={() => setNewSched(s => ({ ...s, location_address: null, location_lat: null, location_lng: null }))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#C0C0C0', fontSize: 13, padding: 0 }}>✕</button>
+              </div>
+            )}
+            {/* Row 4 — Botones + Contacto / Dirección */}
+            {!newSched.contact_id && !newSched.location_address && (
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button type="button" onClick={() => setNewSchedPanel(p => p === 'contact' ? 'none' : 'contact')}
+                  style={{ flex: 1, height: 36, background: newSchedPanel === 'contact' ? '#E8E8E8' : '#fff', border: 'none', borderRadius: 20, fontSize: 13, fontWeight: 600, color: '#1a1a1a', cursor: 'pointer', fontFamily: SYS }}>
+                  + Contacto
+                </button>
+                <button type="button" onClick={() => setNewSchedPanel(p => p === 'address' ? 'none' : 'address')}
+                  style={{ flex: 1, height: 36, background: newSchedPanel === 'address' ? '#E8E8E8' : '#fff', border: 'none', borderRadius: 20, fontSize: 13, fontWeight: 600, color: '#1a1a1a', cursor: 'pointer', fontFamily: SYS }}>
+                  + Dirección
+                </button>
+              </div>
+            )}
+            {/* Inline contact picker */}
+            {newSchedPanel === 'contact' && (
+              <div style={{ background: '#fff', borderRadius: 12, overflow: 'hidden', border: '0.5px solid #E8E8E8' }}>
+                {contacts.length === 0 ? (
+                  <p style={{ fontSize: 13, color: '#C0C0C0', margin: 0, padding: '12px 14px', fontFamily: SYS }}>Sin contactos en este concierto</p>
+                ) : contacts.map((c, i) => (
+                  <button key={c.id} type="button"
+                    onClick={() => { setNewSched(s => ({ ...s, contact_id: c.id })); setNewSchedPanel('none') }}
+                    style={{ width: '100%', textAlign: 'left', padding: '10px 14px', background: 'none', border: 'none', borderBottom: i < contacts.length - 1 ? '0.5px solid #F0F0F0' : 'none', cursor: 'pointer', fontFamily: SYS, minHeight: 44, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: '#1a1a1a' }}>{c.name}</span>
+                    {c.role && <span style={{ fontSize: 12, color: '#999' }}>{c.role}</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+            {/* Inline address search */}
+            {newSchedPanel === 'address' && (
+              <div>
+                <input autoFocus type="text" placeholder="Buscar dirección..."
+                  value={newSchedAddrQuery}
+                  onChange={e => {
+                    const q = e.target.value; setNewSchedAddrQuery(q)
+                    if (newSchedAddrTimer.current) clearTimeout(newSchedAddrTimer.current)
+                    if (q.length < 3) { setNewSchedAddrResults([]); return }
+                    newSchedAddrTimer.current = setTimeout(async () => {
+                      try {
+                        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5`, { headers: { 'Accept-Language': 'es', 'User-Agent': 'TourPilot/1.0' } })
+                        setNewSchedAddrResults(await res.json())
+                      } catch { setNewSchedAddrResults([]) }
+                    }, 400)
+                  }}
+                  style={{ width: '100%', height: 44, background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 10, padding: '0 12px', fontSize: 16, fontFamily: SYS, outline: 'none', boxSizing: 'border-box', marginBottom: newSchedAddrResults.length ? 6 : 0 }} />
+                {newSchedAddrResults.length > 0 && (
+                  <div style={{ background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 10, overflow: 'hidden' }}>
+                    {newSchedAddrResults.map((r, i) => (
+                      <button key={i} type="button"
+                        onClick={() => { setNewSched(s => ({ ...s, location_address: r.display_name, location_lat: parseFloat(r.lat), location_lng: parseFloat(r.lon) })); setNewSchedPanel('none'); setNewSchedAddrQuery(''); setNewSchedAddrResults([]) }}
+                        style={{ width: '100%', textAlign: 'left', padding: '0 12px', background: 'none', border: 'none', borderBottom: i < newSchedAddrResults.length - 1 ? '0.5px solid #F0F0F0' : 'none', cursor: 'pointer', fontFamily: SYS, height: 44, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.display_name.split(',')[0]}</p>
+                        <p style={{ fontSize: 11, color: '#999', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.display_name.split(',').slice(1, 4).join(',').trim()}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+            {/* Row 5 — Cancelar / Guardar */}
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <button type="button" onClick={() => setAddingSched(false)}
+              <button type="button" onClick={() => { setAddingSched(false); setNewSched({ time_start: '', time_end: '', title: '', subtitle: '', contact_id: null, location_address: null, location_lat: null, location_lng: null }); setNewSchedPanel('none'); setNewSchedAddrQuery(''); setNewSchedAddrResults([]) }}
                 style={{ flex: 1, height: 44, background: 'none', border: 'none', fontSize: 15, color: '#999', cursor: 'pointer', fontFamily: SYS }}>
                 Cancelar
               </button>

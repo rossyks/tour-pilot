@@ -200,6 +200,7 @@ export default function TravelClient({
     width: '100%', background: '#F5F5F5', borderRadius: 10, padding: '11px 14px',
     fontSize: 15, fontFamily: SYS, outline: 'none', minHeight: 44,
     border: '1.5px solid transparent', color: '#1a1a1a',
+    boxSizing: 'border-box', WebkitAppearance: 'none' as const,
   }
   const addBtnStyle: React.CSSProperties = {
     fontSize: 13, fontWeight: 600, background: '#1a1a1a', color: '#fff',
