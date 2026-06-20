@@ -185,15 +185,12 @@ export default function TourClient({
   async function handleBandLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-    const filePath = `${initialTour.id}.${ext}`
-    const { data: upData, error: upErr } = await supabase.storage.from('band-logos').upload(filePath, file, { upsert: true, contentType: file.type })
-    console.log('Upload data:', upData)
-    console.log('Upload error:', upErr)
+    const filePath = `${initialTour.id}.jpg`
+    const { error: upErr } = await supabase.storage.from('band-logos').upload(filePath, file, { upsert: true, cacheControl: '0', contentType: file.type })
     if (upErr) { alert('Error al subir logo: ' + upErr.message); return }
     const { data: { publicUrl } } = supabase.storage.from('band-logos').getPublicUrl(filePath)
-    const urlWithBust = publicUrl + '?t=' + Date.now()
-    await supabase.from('tours').update({ band_logo_url: publicUrl }).eq('id', initialTour.id)
+    const urlWithBust = `${publicUrl}?t=${Date.now()}`
+    await supabase.from('tours').update({ band_logo_url: urlWithBust }).eq('id', initialTour.id)
     setBandLogoUrl(urlWithBust)
   }
 
