@@ -29,7 +29,7 @@ export default async function TravelPage({ params }: { params: Promise<{ id: str
     ? await supabase.from('tour_members').select('role').eq('tour_id', tourId).eq('user_id', user.id).single()
     : { data: null }
 
-  const isAdmin = membership?.role === 'admin'
+  const isAdmin = membership?.role === 'admin' || membership?.role === 'owner'
 
   return (
     <TravelClient

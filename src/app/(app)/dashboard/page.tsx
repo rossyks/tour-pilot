@@ -15,7 +15,7 @@ export default async function DashboardPage() {
 
   const tourIds = memberships?.map(m => m.tour_id) ?? []
 
-  const adminTourIds = (memberships ?? []).filter(m => m.role === 'admin').map(m => m.tour_id)
+  const adminTourIds = (memberships ?? []).filter(m => m.role === 'admin' || m.role === 'owner').map(m => m.tour_id)
 
   if (tourIds.length === 0) {
     return (

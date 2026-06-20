@@ -28,7 +28,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
   const myMembership = user
     ? (tourMembers ?? []).find((m: { user_id: string; role: string }) => m.user_id === user.id)
     : null
-  const isAdmin = myMembership?.role === 'admin'
+  const isAdmin = myMembership?.role === 'admin' || myMembership?.role === 'owner'
 
   // Fetch all visibility entries for this show's docs and schedule items
   const ticketDocIds = (show.documents ?? []).filter((d: { type: string }) => d.type === 'ticket').map((d: { id: string }) => d.id)
