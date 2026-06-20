@@ -319,16 +319,12 @@ export default function TourClient({
     <div className="tp-page" style={{ minHeight: '100vh', background: '#fff', maxWidth: 390, margin: '0 auto', paddingBottom: 80, fontFamily: SYS }}>
 
       {/* Header */}
-      <div style={{ padding: '48px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ padding: '48px 20px 0', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <Link href="/dashboard">
+          <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px 4px', minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a1a1a', fontSize: 20, lineHeight: 1 }}>←</button>
+        </Link>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.svg" alt="Tour Pilot" height={28} style={{ display: 'block', maxWidth: 140 }} />
-        <Link href="/dashboard">
-          <button style={{ display: 'flex', flexDirection: 'column', gap: 5, padding: 8, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, justifyContent: 'center' }}>
-            <span style={{ display: 'block', width: 22, height: 2, background: '#1a1a1a', borderRadius: 2 }} />
-            <span style={{ display: 'block', width: 22, height: 2, background: '#1a1a1a', borderRadius: 2 }} />
-            <span style={{ display: 'block', width: 22, height: 2, background: '#1a1a1a', borderRadius: 2 }} />
-          </button>
-        </Link>
       </div>
 
       {/* Tour title — editable for admin */}
