@@ -153,6 +153,7 @@ export default function TourClient({
   const [teamError, setTeamError] = useState<string | null>(null)
   const [bandLogoUrl, setBandLogoUrl] = useState<string | null>(initialTour.band_logo_url)
   const bandLogoInputRef = useRef<HTMLInputElement>(null)
+  const [confirmDeleteLogo, setConfirmDeleteLogo] = useState(false)
 
   useScrollLock(sheetOpen || teamSheetOpen || transferSheet || !!confirmRoleChange || !!confirmRemove || !!confirmTransfer)
   const [form, setForm] = useState({
@@ -171,6 +172,14 @@ export default function TourClient({
     }
     await supabase.from('tours').update({ name: tourName.trim() }).eq('id', initialTour.id)
     setEditingName(false)
+  }
+
+  async function handleDeleteLogo() {
+    const ext = bandLogoUrl?.split('.').pop()?.split('?')[0] || 'jpg'
+    await supabase.storage.from('band-logos').remove([`${initialTour.id}.${ext}`])
+    await supabase.from('tours').update({ band_logo_url: null }).eq('id', initialTour.id)
+    setBandLogoUrl(null)
+    setConfirmDeleteLogo(false)
   }
 
   async function handleBandLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -537,23 +546,40 @@ export default function TourClient({
 
               {/* Identidad de la gira */}
               <p style={{ fontWeight: 700, fontSize: 13, color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 14px 0', fontFamily: SYS }}>Identidad de la gira</p>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
-                <input ref={bandLogoInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBandLogoChange} />
-                <div
-                  onClick={() => isAdmin && bandLogoInputRef.current?.click()}
-                  style={{ width: 110, height: 64, borderRadius: 12, background: bandLogoUrl ? 'transparent' : '#F5F5F5', cursor: isAdmin ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
-                  {bandLogoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={bandLogoUrl} alt="Band logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                  ) : (
+              <input ref={bandLogoInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBandLogoChange} />
+              {bandLogoUrl ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24, gap: 10 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={bandLogoUrl} alt="Band logo" style={{ maxHeight: 56, width: 'auto', maxWidth: 140, objectFit: 'contain' }} />
+                  <div style={{ display: 'flex', gap: 20 }}>
+                    <button onClick={() => bandLogoInputRef.current?.click()} style={{ background: 'none', border: 'none', padding: 0, fontSize: 13, fontWeight: 500, color: '#1a1a1a', cursor: 'pointer', fontFamily: SYS }}>Cambiar logo</button>
+                    <button onClick={() => setConfirmDeleteLogo(true)} style={{ background: 'none', border: 'none', padding: 0, fontSize: 13, fontWeight: 500, color: '#DC412C', cursor: 'pointer', fontFamily: SYS }}>Eliminar logo</button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
+                  <div
+                    onClick={() => bandLogoInputRef.current?.click()}
+                    style={{ width: 110, height: 64, borderRadius: 12, background: '#F5F5F5', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#BBBBBB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
                       <circle cx="12" cy="13" r="4"/>
                     </svg>
-                  )}
+                  </div>
+                  <p style={{ fontSize: 12, color: '#999', margin: '6px 0 0 0', fontFamily: SYS }}>Logo de la banda</p>
                 </div>
-                <p style={{ fontSize: 12, color: '#999', margin: '6px 0 0 0', fontFamily: SYS }}>Logo de la banda</p>
-              </div>
+              )}
+
+              {/* Confirm delete logo */}
+              {confirmDeleteLogo && (
+                <div style={{ background: '#F5F5F5', borderRadius: 14, padding: '16px', marginBottom: 20 }}>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: '#1a1a1a', margin: '0 0 12px 0', fontFamily: SYS }}>¿Eliminar el logo de la gira?</p>
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <button onClick={handleDeleteLogo} style={{ flex: 1, height: 44, background: '#DC412C', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: SYS }}>Eliminar</button>
+                    <button onClick={() => setConfirmDeleteLogo(false)} style={{ flex: 1, height: 44, background: '#E8E8E8', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 500, color: '#1a1a1a', cursor: 'pointer', fontFamily: SYS }}>Cancelar</button>
+                  </div>
+                </div>
+              )}
 
               {/* Equipo actual */}
               <p style={{ fontWeight: 700, fontSize: 13, color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 14px 0', fontFamily: SYS }}>Equipo actual</p>
