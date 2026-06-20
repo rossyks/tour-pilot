@@ -1051,14 +1051,14 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
         <div style={{ backgroundColor: color, borderRadius: 20, padding: '16px 16px 14px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: 0 }}>
           {/* Top: venue + city·date + address */}
           <div style={{ marginBottom: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <Editable value={data.venue_name} onSave={v => update('venue_name', v)} isAdmin={isAdmin}
                   style={{ fontWeight: 800, fontSize: 24, color: '#1a1a1a', lineHeight: 1.15, display: 'block' }} />
               </div>
               {bandLogoUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={bandLogoUrl} alt="" style={{ maxHeight: 28, width: 'auto', maxWidth: 90, objectFit: 'contain', flexShrink: 0 }} />
+                <img src={bandLogoUrl} alt="" style={{ maxHeight: 24, width: 'auto', maxWidth: 80, objectFit: 'contain', marginLeft: 12, marginTop: 2, flexShrink: 0 }} />
               )}
             </div>
             <p style={{ fontSize: 14, color: 'rgba(26,26,26,0.7)', margin: '4px 0 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
