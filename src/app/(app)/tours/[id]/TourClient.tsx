@@ -122,7 +122,7 @@ function SwipeDeleteRow({
 export default function TourClient({
   tour: initialTour, shows: initialShows, travelDays: initialTravelDays, isAdmin, isOwner, tourMembers: initialTourMembers, userId,
 }: {
-  tour: { id: string; name: string; band_tag: string | null; invite_code_band: string | null; invite_code_artist: string | null; invite_code_crew: string | null; owner_id: string | null }
+  tour: { id: string; name: string; band_tag: string | null; invite_code_band: string | null; invite_code_artist: string | null; invite_code_crew: string | null; owner_id: string | null; band_logo_url: string | null }
   shows: Show[]
   travelDays: TravelDay[]
   isAdmin: boolean
@@ -151,6 +151,8 @@ export default function TourClient({
   const [transferSheet, setTransferSheet] = useState(false)
   const [confirmTransfer, setConfirmTransfer] = useState<{ memberId: string; name: string } | null>(null)
   const [teamError, setTeamError] = useState<string | null>(null)
+  const [bandLogoUrl, setBandLogoUrl] = useState<string | null>(initialTour.band_logo_url)
+  const bandLogoInputRef = useRef<HTMLInputElement>(null)
 
   useScrollLock(sheetOpen || teamSheetOpen || transferSheet || !!confirmRoleChange || !!confirmRemove || !!confirmTransfer)
   const [form, setForm] = useState({
@@ -169,6 +171,18 @@ export default function TourClient({
     }
     await supabase.from('tours').update({ name: tourName.trim() }).eq('id', initialTour.id)
     setEditingName(false)
+  }
+
+  async function handleBandLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const filePath = `${initialTour.id}.jpg`
+    const { error: upErr } = await supabase.storage.from('band-logos').upload(filePath, file, { upsert: true, contentType: file.type })
+    if (upErr) { alert('Error al subir logo'); return }
+    const { data: { publicUrl } } = supabase.storage.from('band-logos').getPublicUrl(filePath)
+    const urlWithBust = publicUrl + '?t=' + Date.now()
+    await supabase.from('tours').update({ band_logo_url: publicUrl }).eq('id', initialTour.id)
+    setBandLogoUrl(urlWithBust)
   }
 
   async function handleCreate(e: React.FormEvent) {
@@ -336,6 +350,10 @@ export default function TourClient({
           </p>
         )}
         <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: '#1a1a1a', borderRadius: 20, padding: '4px 10px', flexShrink: 0, fontFamily: SYS, whiteSpace: 'nowrap' }}>{fechaLabel}</span>
+        {bandLogoUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={bandLogoUrl} alt="Band logo" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+        )}
         {isAdmin && (
           <button onClick={() => setTeamSheetOpen(true)} style={{ padding: 8, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <svg width="22" height="18" viewBox="0 0 22 18" fill="none">
@@ -448,6 +466,10 @@ export default function TourClient({
                     <p style={{ fontSize: 18, fontWeight: 800, color: '#1a1a1a', margin: 0, lineHeight: 1.2, fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{show.venue_name}</p>
                     <p style={{ fontSize: 13, fontStyle: 'italic', color: '#1a1a1a', opacity: 0.6, margin: '4px 0 0 0', fontFamily: SYS }}>{show.city}</p>
                   </div>
+                  {bandLogoUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={bandLogoUrl} alt="" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 10, right: 36, flexShrink: 0 }} />
+                  )}
                   <span style={{ fontSize: 14, color: '#1a1a1a', opacity: 0.35, position: 'absolute', bottom: 14, right: 16, lineHeight: 1 }}>→</span>
                 </div>
               </Link>
@@ -513,6 +535,26 @@ export default function TourClient({
           <>
             <div onClick={() => setTeamSheetOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }} />
             <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px 44px', zIndex: 9999, maxHeight: '85dvh', overflowY: 'auto', WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
+
+              {/* Identidad de la gira */}
+              <p style={{ fontWeight: 700, fontSize: 13, color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 14px 0', fontFamily: SYS }}>Identidad de la gira</p>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 24 }}>
+                <input ref={bandLogoInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBandLogoChange} />
+                <div
+                  onClick={() => isAdmin && bandLogoInputRef.current?.click()}
+                  style={{ width: 64, height: 64, borderRadius: '50%', background: bandLogoUrl ? 'transparent' : '#F5F5F5', cursor: isAdmin ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+                  {bandLogoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={bandLogoUrl} alt="Band logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#BBBBBB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+                      <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                  )}
+                </div>
+                <p style={{ fontSize: 12, color: '#999', margin: '6px 0 0 0', fontFamily: SYS }}>Logo de la banda</p>
+              </div>
 
               {/* Equipo actual */}
               <p style={{ fontWeight: 700, fontSize: 13, color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 14px 0', fontFamily: SYS }}>Equipo actual</p>

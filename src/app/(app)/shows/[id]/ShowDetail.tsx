@@ -544,7 +544,7 @@ function SchedLocationSheet({ open, onClose, onSave }: {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers, ticketVisibility, scheduleVisibility, color: colorProp }: { show: Show; isAdmin: boolean; tourId: string; userId: string | null; tourMembers: TourMember[]; ticketVisibility: TicketVisibility[]; scheduleVisibility: ScheduleVisibility[]; color?: string }) {
+export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers, ticketVisibility, scheduleVisibility, color: colorProp, bandLogoUrl }: { show: Show; isAdmin: boolean; tourId: string; userId: string | null; tourMembers: TourMember[]; ticketVisibility: TicketVisibility[]; scheduleVisibility: ScheduleVisibility[]; color?: string; bandLogoUrl?: string | null }) {
   const supabase = createClient()
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -1048,7 +1048,11 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
 
       {/* ── Hero card ── */}
       <div style={{ padding: '0 16px 20px' }}>
-        <div style={{ backgroundColor: color, borderRadius: 20, padding: '16px 16px 14px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: 0 }}>
+        <div style={{ backgroundColor: color, borderRadius: 20, padding: '16px 16px 14px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: 0, position: 'relative' }}>
+          {bandLogoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={bandLogoUrl} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 8, right: 8 }} />
+          )}
           {/* Top: venue + city·date + address */}
           <div style={{ marginBottom: 10 }}>
             <Editable value={data.venue_name} onSave={v => update('venue_name', v)} isAdmin={isAdmin}

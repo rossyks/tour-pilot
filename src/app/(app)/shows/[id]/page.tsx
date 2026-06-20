@@ -17,7 +17,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
   if (!show) notFound()
 
   const [{ data: tour }, { data: tourMembers }, { data: tourShows }] = await Promise.all([
-    supabase.from('tours').select('id, name').eq('id', show.tour_id).single(),
+    supabase.from('tours').select('id, name, band_logo_url').eq('id', show.tour_id).single(),
     supabase.from('tour_members').select('*, profiles(id, full_name, username, avatar_url)').eq('tour_id', show.tour_id),
     supabase.from('shows').select('id').eq('tour_id', show.tour_id).order('date', { ascending: true }),
   ])
@@ -53,6 +53,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
       ticketVisibility={(ticketVisibility ?? []) as TicketVisibility[]}
       scheduleVisibility={(scheduleVisibility ?? []) as ScheduleVisibility[]}
       color={showColor}
+      bandLogoUrl={tour?.band_logo_url ?? null}
     />
   )
 }
