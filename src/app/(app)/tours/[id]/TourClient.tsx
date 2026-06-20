@@ -355,7 +355,7 @@ export default function TourClient({
         <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: '#1a1a1a', borderRadius: 20, padding: '4px 10px', flexShrink: 0, fontFamily: SYS, whiteSpace: 'nowrap' }}>{fechaLabel}</span>
         {bandLogoUrl && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={bandLogoUrl} alt="Band logo" style={{ maxWidth: 80, height: 36, borderRadius: 8, objectFit: 'contain', flexShrink: 0 }} />
+          <img src={bandLogoUrl} alt="Band logo" style={{ maxHeight: 24, width: 'auto', maxWidth: 80, objectFit: 'contain', flexShrink: 0 }} />
         )}
         {isAdmin && (
           <button onClick={() => setTeamSheetOpen(true)} style={{ padding: 8, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -469,10 +469,6 @@ export default function TourClient({
                     <p style={{ fontSize: 18, fontWeight: 800, color: '#1a1a1a', margin: 0, lineHeight: 1.2, fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{show.venue_name}</p>
                     <p style={{ fontSize: 13, fontStyle: 'italic', color: '#1a1a1a', opacity: 0.6, margin: '4px 0 0 0', fontFamily: SYS }}>{show.city}</p>
                   </div>
-                  {bandLogoUrl && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={bandLogoUrl} alt="" style={{ maxWidth: 48, height: 18, borderRadius: 4, objectFit: 'contain', position: 'absolute', top: 10, right: 36 }} />
-                  )}
                   <span style={{ fontSize: 14, color: '#1a1a1a', opacity: 0.35, position: 'absolute', bottom: 14, right: 16, lineHeight: 1 }}>→</span>
                 </div>
               </Link>

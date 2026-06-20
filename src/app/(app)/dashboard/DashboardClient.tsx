@@ -142,7 +142,7 @@ function SwipeTourRow({
         </div>
         {tour.band_logo_url && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={tour.band_logo_url} alt="" style={{ maxWidth: 64, height: 24, borderRadius: 5, objectFit: 'contain', position: 'absolute', top: 12, right: 12 }} />
+          <img src={tour.band_logo_url} alt="" style={{ maxHeight: 20, width: 'auto', maxWidth: 70, objectFit: 'contain', position: 'absolute', top: 12, right: 12 }} />
         )}
         <span style={{ fontSize: 14, color: '#1a1a1a', opacity: 0.35, position: 'absolute', bottom: 12, right: 16, lineHeight: 1 }}>→</span>
       </div>

@@ -1048,15 +1048,19 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
 
       {/* ── Hero card ── */}
       <div style={{ padding: '0 16px 20px' }}>
-        <div style={{ backgroundColor: color, borderRadius: 20, padding: '16px 16px 14px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: 0, position: 'relative' }}>
-          {bandLogoUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={bandLogoUrl} alt="" style={{ maxWidth: 72, height: 28, borderRadius: 6, objectFit: 'contain', position: 'absolute', top: 8, right: 8 }} />
-          )}
+        <div style={{ backgroundColor: color, borderRadius: 20, padding: '16px 16px 14px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: 0 }}>
           {/* Top: venue + city·date + address */}
           <div style={{ marginBottom: 10 }}>
-            <Editable value={data.venue_name} onSave={v => update('venue_name', v)} isAdmin={isAdmin}
-              style={{ fontWeight: 800, fontSize: 24, color: '#1a1a1a', lineHeight: 1.15, display: 'block' }} />
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <Editable value={data.venue_name} onSave={v => update('venue_name', v)} isAdmin={isAdmin}
+                  style={{ fontWeight: 800, fontSize: 24, color: '#1a1a1a', lineHeight: 1.15, display: 'block' }} />
+              </div>
+              {bandLogoUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={bandLogoUrl} alt="" style={{ maxHeight: 28, width: 'auto', maxWidth: 90, objectFit: 'contain', flexShrink: 0 }} />
+              )}
+            </div>
             <p style={{ fontSize: 14, color: 'rgba(26,26,26,0.7)', margin: '4px 0 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               <span style={{ fontStyle: 'italic' }}>{data.city}</span>
               {' · '}
