@@ -566,6 +566,7 @@ export default function TourClient({
                   <p style={{ fontSize: 12, color: '#999', margin: '6px 0 0 0', fontFamily: SYS }}>Logo de la banda</p>
                 </div>
               )}
+              <p style={{ fontSize: 11, color: '#999', margin: '0 0 24px 0', textAlign: 'center', fontFamily: SYS }}>Recomendado: PNG con fondo transparente y logo en negro</p>
 
               {/* Confirm delete logo */}
               {confirmDeleteLogo && (
