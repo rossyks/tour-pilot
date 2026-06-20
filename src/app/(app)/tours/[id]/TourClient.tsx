@@ -176,9 +176,12 @@ export default function TourClient({
   async function handleBandLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    const filePath = `${initialTour.id}.jpg`
-    const { error: upErr } = await supabase.storage.from('band-logos').upload(filePath, file, { upsert: true, contentType: file.type })
-    if (upErr) { alert('Error al subir logo'); return }
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const filePath = `${initialTour.id}.${ext}`
+    const { data: upData, error: upErr } = await supabase.storage.from('band-logos').upload(filePath, file, { upsert: true, contentType: file.type })
+    console.log('Upload data:', upData)
+    console.log('Upload error:', upErr)
+    if (upErr) { alert('Error al subir logo: ' + upErr.message); return }
     const { data: { publicUrl } } = supabase.storage.from('band-logos').getPublicUrl(filePath)
     const urlWithBust = publicUrl + '?t=' + Date.now()
     await supabase.from('tours').update({ band_logo_url: publicUrl }).eq('id', initialTour.id)
@@ -352,7 +355,7 @@ export default function TourClient({
         <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: '#1a1a1a', borderRadius: 20, padding: '4px 10px', flexShrink: 0, fontFamily: SYS, whiteSpace: 'nowrap' }}>{fechaLabel}</span>
         {bandLogoUrl && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={bandLogoUrl} alt="Band logo" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+          <img src={bandLogoUrl} alt="Band logo" style={{ maxWidth: 80, height: 36, borderRadius: 8, objectFit: 'contain', flexShrink: 0 }} />
         )}
         {isAdmin && (
           <button onClick={() => setTeamSheetOpen(true)} style={{ padding: 8, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -468,7 +471,7 @@ export default function TourClient({
                   </div>
                   {bandLogoUrl && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={bandLogoUrl} alt="" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 10, right: 36, flexShrink: 0 }} />
+                    <img src={bandLogoUrl} alt="" style={{ maxWidth: 48, height: 18, borderRadius: 4, objectFit: 'contain', position: 'absolute', top: 10, right: 36 }} />
                   )}
                   <span style={{ fontSize: 14, color: '#1a1a1a', opacity: 0.35, position: 'absolute', bottom: 14, right: 16, lineHeight: 1 }}>→</span>
                 </div>
@@ -542,10 +545,10 @@ export default function TourClient({
                 <input ref={bandLogoInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBandLogoChange} />
                 <div
                   onClick={() => isAdmin && bandLogoInputRef.current?.click()}
-                  style={{ width: 64, height: 64, borderRadius: '50%', background: bandLogoUrl ? 'transparent' : '#F5F5F5', cursor: isAdmin ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
+                  style={{ width: 110, height: 64, borderRadius: 12, background: bandLogoUrl ? 'transparent' : '#F5F5F5', cursor: isAdmin ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
                   {bandLogoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={bandLogoUrl} alt="Band logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={bandLogoUrl} alt="Band logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
                   ) : (
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#BBBBBB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>

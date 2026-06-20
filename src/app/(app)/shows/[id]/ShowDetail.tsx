@@ -1051,7 +1051,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
         <div style={{ backgroundColor: color, borderRadius: 20, padding: '16px 16px 14px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: 0, position: 'relative' }}>
           {bandLogoUrl && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={bandLogoUrl} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', position: 'absolute', top: 8, right: 8 }} />
+            <img src={bandLogoUrl} alt="" style={{ maxWidth: 72, height: 28, borderRadius: 6, objectFit: 'contain', position: 'absolute', top: 8, right: 8 }} />
           )}
           {/* Top: venue + city·date + address */}
           <div style={{ marginBottom: 10 }}>
