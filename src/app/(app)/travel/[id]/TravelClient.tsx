@@ -412,7 +412,7 @@ export default function TravelClient({
         {mounted && confirmDelete && createPortal(
           <>
             <div onClick={() => setConfirmDelete(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }} />
-            <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px 44px', zIndex: 9999, maxWidth: 430, margin: '0 auto', WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
+            <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px 44px', zIndex: 9999, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
               <p style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a', margin: '0 0 8px 0', fontFamily: SYS }}>Eliminar Travel Day</p>
               <p style={{ fontSize: 14, color: '#666', margin: '0 0 24px 0', fontFamily: SYS, lineHeight: 1.5 }}>¿Eliminar este Travel Day? Se perderán todos los datos asociados.</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

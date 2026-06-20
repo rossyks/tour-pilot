@@ -761,7 +761,7 @@ export default function TourClient({
         {sheetOpen && (
           <>
             <div onClick={closeSheet} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }} />
-            <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, top: 'auto', background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px 44px', maxWidth: 430, margin: '0 auto', zIndex: 9999, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
+            <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, top: 'auto', background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px 44px', zIndex: 9999, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
               <p style={{ fontWeight: 700, fontSize: 18, margin: '0 0 20px 0', fontFamily: SYS }}>Nueva fecha</p>
               <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div>

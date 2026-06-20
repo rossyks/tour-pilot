@@ -47,7 +47,6 @@ function BottomSheet({ open, onClose, children }: { open: boolean; onClose: () =
           position: 'fixed', bottom: 0, left: 0, right: 0, top: 'auto',
           background: '#fff', borderRadius: '20px 20px 0 0',
           padding: '20px 20px 36px', zIndex: 9999,
-          maxWidth: 430, margin: '0 auto',
           WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)',
         }}
       >
@@ -187,7 +186,7 @@ function VenueAddressSheet({ open, onClose, onSave }: {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 200 }}>
       <div onClick={handleClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }} />
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '20px 20px 36px', maxWidth: 430, margin: '0 auto' }}>
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '20px 20px 36px' }}>
         <p style={{ fontWeight: 700, fontSize: 15, margin: '0 0 14px 0', fontFamily: SYS }}>Editar dirección</p>
         <input
           autoFocus value={query} onChange={e => handleChange(e.target.value)}
@@ -281,7 +280,7 @@ function ContactsSheet({ open, onClose, contacts, isAdmin, showId, onAdd, onDele
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 100 }}>
       <div onClick={handleClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }} />
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '20px 20px 36px', maxWidth: 430, margin: '0 auto' }}>
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '20px 20px 36px' }}>
         <p style={{ fontWeight: 700, fontSize: 16, margin: '0 0 16px 0', fontFamily: SYS }}>Contactos</p>
 
         {contacts.length === 0 && !adding && (
@@ -401,7 +400,7 @@ function HotelEditSheet({ open, onClose, initialName, initialPhone, onSave }: {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 200 }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }} />
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '20px 20px 36px', maxWidth: 430, margin: '0 auto' }}>
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '20px 20px 36px' }}>
         <p style={{ fontWeight: 700, fontSize: 16, margin: '0 0 14px 0', fontFamily: SYS }}>Editar hotel</p>
 
         {/* Search */}
@@ -485,7 +484,7 @@ function SchedLocationSheet({ open, onClose, onSave }: {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 200 }}>
       <div onClick={handleClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)' }} />
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '20px 20px 36px', maxWidth: 430, margin: '0 auto' }}>
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '20px 20px 36px' }}>
         <p style={{ fontWeight: 700, fontSize: 15, margin: '0 0 14px 0', fontFamily: SYS }}>Añadir dirección</p>
         <input autoFocus value={query} onChange={e => handleChange(e.target.value)}
           placeholder="Buscar dirección…"
