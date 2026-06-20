@@ -319,12 +319,24 @@ export default function TourClient({
     <div className="tp-page" style={{ minHeight: '100vh', background: '#fff', maxWidth: 390, margin: '0 auto', paddingBottom: 80, fontFamily: SYS }}>
 
       {/* Header */}
-      <div style={{ padding: '48px 20px 0', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <Link href="/dashboard">
-          <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px 4px', minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a1a1a', fontSize: 20, lineHeight: 1 }}>←</button>
-        </Link>
+      <div style={{ padding: '48px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.svg" alt="Tour Pilot" height={28} style={{ display: 'block', maxWidth: 140 }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <Link href="/dashboard">
+            <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a1a1a', fontSize: 20, lineHeight: 1 }}>←</button>
+          </Link>
+          {isAdmin && (
+            <button onClick={() => setTeamSheetOpen(true)} style={{ padding: 8, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="22" height="18" viewBox="0 0 22 18" fill="none">
+                <circle cx="8" cy="5" r="3.5" stroke="#1a1a1a" strokeWidth="1.5"/>
+                <path d="M1 17c0-3.87 3.13-7 7-7s7 3.13 7 7" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
+                <circle cx="17" cy="5" r="2.5" stroke="#1a1a1a" strokeWidth="1.5"/>
+                <path d="M15 17c0-2.21 1.79-4 4-4" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Tour title — editable for admin */}
@@ -358,16 +370,6 @@ export default function TourClient({
         {bandLogoUrl && (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={bandLogoUrl} alt="Band logo" style={{ maxHeight: 24, width: 'auto', maxWidth: 80, objectFit: 'contain', flexShrink: 0 }} />
-        )}
-        {isAdmin && (
-          <button onClick={() => setTeamSheetOpen(true)} style={{ padding: 8, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <svg width="22" height="18" viewBox="0 0 22 18" fill="none">
-              <circle cx="8" cy="5" r="3.5" stroke="#1a1a1a" strokeWidth="1.5"/>
-              <path d="M1 17c0-3.87 3.13-7 7-7s7 3.13 7 7" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
-              <circle cx="17" cy="5" r="2.5" stroke="#1a1a1a" strokeWidth="1.5"/>
-              <path d="M15 17c0-2.21 1.79-4 4-4" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-          </button>
         )}
       </div>
 
