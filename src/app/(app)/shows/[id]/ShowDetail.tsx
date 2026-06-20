@@ -11,8 +11,10 @@ import { useScrollLock } from '@/lib/useScrollLock'
 const SYS = "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif"
 
 function normalizeUrl(url: string) {
-  if (!url.startsWith('http://') && !url.startsWith('https://')) return 'https://' + url
-  return url
+  const trimmed = url.trim()
+  if (trimmed.toLowerCase().startsWith('javascript:')) return '#'
+  if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) return 'https://' + trimmed
+  return trimmed
 }
 
 
@@ -900,6 +902,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
   }
 
   async function generatePdf() {
+    try {
     const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
       import('jspdf'),
       import('jspdf-autotable'),
@@ -956,7 +959,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
       autoTable(doc, {
         startY: y, margin: { left: M, right: M },
         head: [['HORA INICIO', 'HORA FIN', 'ACTIVIDAD', 'NOTAS']],
-        body: schedule.map(s => [t5(s.time_start), t5(s.time_end) || '', s.title, s.subtitle || '']),
+        body: visibleSchedule.map(s => [t5(s.time_start), t5(s.time_end) || '', s.title, s.subtitle || '']),
         styles: { fontSize: 9, cellPadding: { top: 4, bottom: 4, left: 4, right: 4 }, font: 'courier', textColor: [26, 26, 26] as [number, number, number] },
         headStyles: { fillColor: [26, 26, 26] as [number, number, number], textColor: [255, 255, 255] as [number, number, number], fontSize: 7, fontStyle: 'bold', font: 'helvetica' },
         columnStyles: { 0: { cellWidth: 26 }, 1: { cellWidth: 22 } },
@@ -1001,7 +1004,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
     }
 
     // ── Bloque 5 — Documentos ──────────────────────────────────────────────────
-    const allDocs = [...riderDocs, ...ticketDocs]
+    const allDocs = [...riderDocs, ...visibleTicketDocs]
     if (allDocs.length > 0) {
       doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(153, 153, 153)
       doc.text('DOCUMENTOS', M, y); y += 6
@@ -1021,6 +1024,9 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
     doc.text(new Date().toLocaleString('es-ES'), W - M, pageH - 8, { align: 'right' })
 
     doc.save(`${data.venue_name.replace(/[^a-z0-9]/gi, '_')}_${data.date}.pdf`)
+    } catch {
+      alert('Error al generar el PDF. Inténtalo de nuevo.')
+    }
   }
 
   return (
@@ -1436,7 +1442,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
         {addingSched && (
           <form onSubmit={saveSched} style={{ background: '#F5F5F5', borderRadius: 16, padding: 16, margin: '8px 0', display: 'flex', flexDirection: 'column', gap: 12, width: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
             {/* Row 1 — Inicio / Fin */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, width: '100%', boxSizing: 'border-box' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 1fr) minmax(120px, 1fr)', gap: 12, width: '100%', boxSizing: 'border-box' }}>
               <div style={{ minWidth: 0 }}>
                 <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', margin: '0 0 6px 0', fontFamily: SYS }}>Inicio</p>
                 <input type="time" value={newSched.time_start} onChange={e => setNewSched(s => ({ ...s, time_start: e.target.value }))} required
@@ -1654,7 +1660,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
           </div>
           <div>
             <p style={{ fontSize: 11, color: '#999', margin: '0 0 4px 0', fontFamily: SYS, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Duración (minutos)</p>
-            <input type="number" min="0" value={showForm.duration} onChange={e => setShowForm(f => ({ ...f, duration: e.target.value }))} placeholder="—" style={inputStyle} />
+            <input type="number" min="0" step="1" value={showForm.duration} onChange={e => setShowForm(f => ({ ...f, duration: e.target.value }))} placeholder="—" style={inputStyle} />
           </div>
           <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
             <button onClick={() => setInfoSheet(null)} style={cancelFlexStyle}>Cancelar</button>
@@ -1675,7 +1681,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
           </div>
           <div>
             <p style={{ fontSize: 11, color: '#999', margin: '0 0 4px 0', fontFamily: SYS, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Duración (minutos)</p>
-            <input type="number" min="0" value={scForm.duration} onChange={e => setScForm(f => ({ ...f, duration: e.target.value }))} placeholder="—" style={inputStyle} />
+            <input type="number" min="0" step="1" value={scForm.duration} onChange={e => setScForm(f => ({ ...f, duration: e.target.value }))} placeholder="—" style={inputStyle} />
           </div>
           <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
             <button onClick={() => setInfoSheet(null)} style={cancelFlexStyle}>Cancelar</button>
@@ -1760,12 +1766,12 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
       {isAdmin && <HotelEditSheet open={sheetHotel} onClose={() => setSheetHotel(false)}
         initialName={data.hotel_name ?? ''} initialPhone={data.hotel_phone ?? ''}
         onSave={async ({ name, address, lat, lng, phone }) => {
+          setSheetHotel(false)
           if (name) await update('hotel_name', name)
           if (address) await update('hotel_address', address)
           if (lat != null) await update('hotel_lat', lat)
           if (lng != null) await update('hotel_lng', lng)
           await update('hotel_phone', phone || null)
-          setSheetHotel(false)
         }}
       />}
 
