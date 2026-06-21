@@ -639,8 +639,16 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
   const [travelDayAfter, setTravelDayAfter] = useState<TravelDay | null>(null)
   const [creatingTravel, setCreatingTravel] = useState<'before' | 'after' | null>(null)
   const [contacts, setContacts] = useState<Contact[]>(show.contacts ?? [])
+  function adjTime(t: string, nd: boolean) {
+    const [h, m] = t.split(':').map(Number)
+    return (nd ? h + 24 : h) * 60 + m
+  }
+  function sortSched<T extends { time_start: string; next_day: boolean }>(arr: T[]): T[] {
+    return [...arr].sort((a, b) => adjTime(a.time_start, a.next_day) - adjTime(b.time_start, b.next_day))
+  }
+
   const [schedule, setSchedule] = useState<ScheduleItem[]>(
-    (show.schedule_items ?? []).sort((a, b) => a.time_start.localeCompare(b.time_start))
+    sortSched(show.schedule_items ?? [])
   )
   const [docs, setDocs] = useState<Document[]>(
     (show.documents ?? []).sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0))
@@ -757,7 +765,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
   const [expandedSchedId, setExpandedSchedId] = useState<string | null>(null)
   const [editingSchedMap, setEditingSchedMap] = useState<Record<string, Partial<ScheduleItem>>>({})
   const [addingSched, setAddingSched] = useState(false)
-  const [newSched, setNewSched] = useState({ time_start: '', time_end: '', title: '', subtitle: '', contact_id: null as string | null, location_address: null as string | null, location_lat: null as number | null, location_lng: null as number | null })
+  const [newSched, setNewSched] = useState({ time_start: '', time_end: '', title: '', subtitle: '', contact_id: null as string | null, location_address: null as string | null, location_lat: null as number | null, location_lng: null as number | null, next_day: false })
   const [newSchedPanel, setNewSchedPanel] = useState<'none' | 'contact' | 'address'>('none')
   const [newSchedAddrQuery, setNewSchedAddrQuery] = useState('')
   const [newSchedAddrResults, setNewSchedAddrResults] = useState<{ display_name: string; lat: string; lon: string }[]>([])
@@ -775,13 +783,13 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
   async function saveSchedField(id: string, field: string, value: string | number | null) {
     const v = value === '' ? null : value
     await supabase.from('schedule_items').update({ [field]: v }).eq('id', id)
-    setSchedule(s => s.map(x => x.id === id ? { ...x, [field]: v } : x).sort((a, b) => a.time_start.localeCompare(b.time_start)))
+    setSchedule(s => sortSched(s.map(x => x.id === id ? { ...x, [field]: v } : x)))
   }
   async function saveSchedEdit(id: string, item: ScheduleItem) {
     const edits = editingSchedMap[id] ?? {}
     if (!Object.keys(edits).length) return
     await supabase.from('schedule_items').update(edits).eq('id', id)
-    setSchedule(s => s.map(x => x.id === id ? { ...x, ...edits } : x).sort((a, b) => a.time_start.localeCompare(b.time_start)))
+    setSchedule(s => sortSched(s.map(x => x.id === id ? { ...x, ...edits } : x)))
   }
   async function saveSched(e: React.FormEvent) {
     e.preventDefault()
@@ -797,10 +805,11 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
       location_lat: newSched.location_lat,
       location_lng: newSched.location_lng,
       order_index: schedule.length,
+      next_day: newSched.next_day,
     }).select().single()
-    if (row) setSchedule(s => [...s, row].sort((a, b) => a.time_start.localeCompare(b.time_start)))
+    if (row) setSchedule(s => sortSched([...s, row]))
     setAddingSched(false)
-    setNewSched({ time_start: '', time_end: '', title: '', subtitle: '', contact_id: null, location_address: null, location_lat: null, location_lng: null })
+    setNewSched({ time_start: '', time_end: '', title: '', subtitle: '', contact_id: null, location_address: null, location_lat: null, location_lng: null, next_day: false })
     setNewSchedPanel('none'); setNewSchedAddrQuery(''); setNewSchedAddrResults([])
   }
   async function deleteSched(id: string) {
@@ -1385,7 +1394,9 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
               <div key={item.id} style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: 0, marginBottom: 16 }}>
                 {/* Time column */}
                 <div style={{ width: 60, flexShrink: 0 }}>
-                  <p style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a', margin: 0, lineHeight: 1.2, fontFamily: SYS }}>{t5(item.time_start)}</p>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a', margin: 0, lineHeight: 1.2, fontFamily: SYS }}>
+                    {t5(item.time_start)}{item.next_day && <sup style={{ fontSize: 9, color: '#999', fontWeight: 400, marginLeft: 2 }}>+1</sup>}
+                  </p>
                   {item.time_end && <p style={{ fontSize: 12, color: '#999', margin: '2px 0 0 0', lineHeight: 1.2, fontFamily: SYS }}>{t5(item.time_end)}</p>}
                 </div>
 
@@ -1463,6 +1474,16 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
                           onChange={e => setEdit(item.id, { subtitle: e.target.value || null })}
                           style={{ ...inputStyle, fontSize: 14 }} />
                       </div>
+                      {/* next_day toggle — only when start < 06:00 */}
+                      {(() => { const h = parseInt((ed.time_start ?? item.time_start).split(':')[0]); return h < 6 ? (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                          <span style={{ fontSize: 13, color: '#999', fontFamily: SYS }}>¿Madrugada del día siguiente?</span>
+                          <div onClick={() => setEdit(item.id, { next_day: !(ed.next_day ?? item.next_day) })}
+                            style={{ width: 44, height: 26, borderRadius: 13, background: (ed.next_day ?? item.next_day) ? '#1a1a1a' : '#E0E0E0', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0 }}>
+                            <div style={{ position: 'absolute', top: 3, left: (ed.next_day ?? item.next_day) ? 21 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                          </div>
+                        </div>
+                      ) : null })()}
                       {/* Linked contact */}
                       {linkedContact && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, padding: '6px 10px', background: '#fff', borderRadius: 10 }}>
@@ -1534,6 +1555,16 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
               <input type="text" placeholder="Nota o detalle opcional" value={newSched.subtitle} onChange={e => setNewSched(s => ({ ...s, subtitle: e.target.value }))}
                 style={{ height: 44, width: '100%', background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 10, padding: '0 12px', fontSize: 16, fontFamily: SYS, outline: 'none', boxSizing: 'border-box' }} />
             </div>
+            {/* Toggle: next_day — only when time is 00:00–05:59 */}
+            {newSched.time_start && parseInt(newSched.time_start.split(':')[0]) < 6 && (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', opacity: 1, transition: 'opacity 0.2s' }}>
+                <span style={{ fontSize: 13, color: '#999', fontFamily: SYS }}>¿Madrugada del día siguiente?</span>
+                <div onClick={() => setNewSched(s => ({ ...s, next_day: !s.next_day }))}
+                  style={{ width: 44, height: 26, borderRadius: 13, background: newSched.next_day ? '#1a1a1a' : '#E0E0E0', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0 }}>
+                  <div style={{ position: 'absolute', top: 3, left: newSched.next_day ? 21 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                </div>
+              </div>
+            )}
             {/* Selected contact / address preview */}
             {newSched.contact_id && (() => { const c = contacts.find(x => x.id === newSched.contact_id); return c ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1608,7 +1639,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
             )}
             {/* Row 5 — Cancelar / Guardar */}
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <button type="button" onClick={() => { setAddingSched(false); setNewSched({ time_start: '', time_end: '', title: '', subtitle: '', contact_id: null, location_address: null, location_lat: null, location_lng: null }); setNewSchedPanel('none'); setNewSchedAddrQuery(''); setNewSchedAddrResults([]) }}
+              <button type="button" onClick={() => { setAddingSched(false); setNewSched({ time_start: '', time_end: '', title: '', subtitle: '', contact_id: null, location_address: null, location_lat: null, location_lng: null, next_day: false }); setNewSchedPanel('none'); setNewSchedAddrQuery(''); setNewSchedAddrResults([]) }}
                 style={{ flex: 1, height: 44, background: 'none', border: 'none', fontSize: 15, color: '#999', cursor: 'pointer', fontFamily: SYS }}>
                 Cancelar
               </button>

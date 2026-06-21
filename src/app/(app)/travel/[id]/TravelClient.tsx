@@ -95,8 +95,16 @@ export default function TravelClient({
   useEffect(() => { setMounted(true) }, [])
 
   const [td, setTd] = useState(initialTD)
+  function adjTime(t: string, nd: boolean) {
+    const [h, m] = t.split(':').map(Number)
+    return (nd ? h + 24 : h) * 60 + m
+  }
+  function sortSched<T extends { time_start: string; next_day: boolean }>(arr: T[]): T[] {
+    return [...arr].sort((a, b) => adjTime(a.time_start, a.next_day) - adjTime(b.time_start, b.next_day))
+  }
+
   const [schedule, setSchedule] = useState<TravelScheduleItem[]>(
-    [...initialSchedule].sort((a, b) => a.time_start.localeCompare(b.time_start))
+    sortSched(initialSchedule)
   )
   const [docs, setDocs] = useState<TravelDocument[]>(initialDocs)
 
@@ -104,7 +112,7 @@ export default function TravelClient({
   const [editingMap, setEditingMap] = useState<Record<string, Partial<TravelScheduleItem>>>({})
   const [addingSched, setAddingSched] = useState(false)
   useScrollLock(confirmDelete || addingSched)
-  const [newSched, setNewSched] = useState({ time_start: '', time_end: '', title: '', subtitle: '' })
+  const [newSched, setNewSched] = useState({ time_start: '', time_end: '', title: '', subtitle: '', next_day: false })
 
   const [addingLink, setAddingLink] = useState(false)
   const [newLink, setNewLink] = useState({ label: '', url: '' })
@@ -143,17 +151,18 @@ export default function TravelClient({
       title: newSched.title,
       subtitle: newSched.subtitle || null,
       order_index: schedule.length,
+      next_day: newSched.next_day,
     }).select().single()
-    if (row) setSchedule(s => [...s, row].sort((a, b) => a.time_start.localeCompare(b.time_start)))
+    if (row) setSchedule(s => sortSched([...s, row]))
     setAddingSched(false)
-    setNewSched({ time_start: '', time_end: '', title: '', subtitle: '' })
+    setNewSched({ time_start: '', time_end: '', title: '', subtitle: '', next_day: false })
   }
 
   async function saveEdit(id: string) {
     const edits = editingMap[id] ?? {}
     if (!Object.keys(edits).length) { setExpandedId(null); return }
     await supabase.from('travel_schedule_items').update(edits).eq('id', id)
-    setSchedule(s => s.map(x => x.id === id ? { ...x, ...edits } : x).sort((a, b) => a.time_start.localeCompare(b.time_start)))
+    setSchedule(s => sortSched(s.map(x => x.id === id ? { ...x, ...edits } : x)))
     setExpandedId(null)
   }
 
@@ -326,7 +335,9 @@ export default function TravelClient({
                 <div key={item.id} style={{ display: 'flex', gap: 0, marginBottom: idx < schedule.length - 1 ? 20 : 0 }}>
                   {/* Left column: times */}
                   <div style={{ width: 60, flexShrink: 0, paddingTop: 1 }}>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a', margin: 0, fontFamily: SYS }}>{t5(item.time_start)}</p>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a', margin: 0, fontFamily: SYS }}>
+                      {t5(item.time_start)}{item.next_day && <sup style={{ fontSize: 9, color: '#999', fontWeight: 400, marginLeft: 2 }}>+1</sup>}
+                    </p>
                     {item.time_end && <p style={{ fontSize: 12, color: '#999', margin: '1px 0 0 0', fontFamily: SYS }}>{t5(item.time_end)}</p>}
                   </div>
                   {/* Line + dot */}
@@ -366,6 +377,15 @@ export default function TravelClient({
                           <input type="text" value={edit.subtitle ?? item.subtitle ?? ''}
                             onChange={e => setEdit(item.id, { subtitle: e.target.value || null })} style={inputStyle} />
                         </div>
+                        {(() => { const h = parseInt((edit.time_start ?? item.time_start).split(':')[0]); return h < 6 ? (
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span style={{ fontSize: 13, color: '#999', fontFamily: SYS }}>¿Madrugada del día siguiente?</span>
+                            <div onClick={() => setEdit(item.id, { next_day: !(edit.next_day ?? item.next_day) })}
+                              style={{ width: 44, height: 26, borderRadius: 13, background: (edit.next_day ?? item.next_day) ? '#1a1a1a' : '#E0E0E0', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0 }}>
+                              <div style={{ position: 'absolute', top: 3, left: (edit.next_day ?? item.next_day) ? 21 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                            </div>
+                          </div>
+                        ) : null })()}
                         <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', alignItems: 'center' }}>
                           <button onClick={() => deleteSched(item.id)}
                             style={{ fontSize: 12, color: '#DC412C', background: 'none', border: 'none', cursor: 'pointer', fontFamily: SYS, padding: 0 }}>
@@ -393,6 +413,15 @@ export default function TravelClient({
               </div>
               <div><p style={{ fontSize: 11, color: '#999', margin: '0 0 3px 0', fontFamily: SYS }}>Título *</p><input type="text" placeholder="Vuelo, Transfer…" value={newSched.title} onChange={e => setNewSched(s => ({ ...s, title: e.target.value }))} required style={inputStyle} /></div>
               <div><p style={{ fontSize: 11, color: '#999', margin: '0 0 3px 0', fontFamily: SYS }}>Subtítulo</p><input type="text" placeholder="Detalle opcional" value={newSched.subtitle} onChange={e => setNewSched(s => ({ ...s, subtitle: e.target.value }))} style={inputStyle} /></div>
+              {newSched.time_start && parseInt(newSched.time_start.split(':')[0]) < 6 && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 13, color: '#999', fontFamily: SYS }}>¿Madrugada del día siguiente?</span>
+                  <div onClick={() => setNewSched(s => ({ ...s, next_day: !s.next_day }))}
+                    style={{ width: 44, height: 26, borderRadius: 13, background: newSched.next_day ? '#1a1a1a' : '#E0E0E0', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0 }}>
+                    <div style={{ position: 'absolute', top: 3, left: newSched.next_day ? 21 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+                  </div>
+                </div>
+              )}
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 4 }}>
                 <button type="button" onClick={() => setAddingSched(false)} style={{ fontSize: 14, color: '#999', padding: '10px 16px', minHeight: 44, background: 'none', border: 'none', cursor: 'pointer', fontFamily: SYS }}>Cancelar</button>
                 <button type="submit" style={{ ...addBtnStyle, fontSize: 14, padding: '10px 20px', minHeight: 44, borderRadius: 20 }}>Guardar</button>

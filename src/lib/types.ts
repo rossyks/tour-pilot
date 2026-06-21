@@ -64,6 +64,7 @@ export interface ScheduleItem {
   location_address: string | null
   location_lat: number | null
   location_lng: number | null
+  next_day: boolean
 }
 
 export interface Document {
@@ -112,6 +113,7 @@ export interface TravelScheduleItem {
   title: string
   subtitle: string | null
   order_index: number | null
+  next_day: boolean
   created_at: string
 }
 
