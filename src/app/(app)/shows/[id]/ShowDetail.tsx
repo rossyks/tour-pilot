@@ -2117,7 +2117,7 @@ function VisibilitySheetContent({
     onSave(itemId, isEveryoneChecked ? new Set() : new Set(checked))
   }
 
-  const roleColors: Record<string, string> = { admin: '#1a1a1a', band: '#DC412C', artist: '#B090F5', crew: '#A99F49' }
+  const roleColors: Record<string, string> = { admin: '#1a1a1a', band: '#A4B2DA', artist: '#A99F49', crew: '#DC412C' }
   const roleLabel: Record<string, string> = { admin: 'Admin', band: 'Banda', artist: 'Artista', crew: 'Crew' }
 
   return (
@@ -2135,7 +2135,7 @@ function VisibilitySheetContent({
             onClick={() => toggleGroup(band, allBandChecked)}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'none', border: 'none', borderBottom: (artists.length > 0 || crew.length > 0) ? '0.5px solid #E8E8E8' : 'none', cursor: 'pointer', textAlign: 'left' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#DC412C', flexShrink: 0 }} />
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#A4B2DA', flexShrink: 0 }} />
               <span style={{ fontSize: 15, fontWeight: 600, color: '#1a1a1a', fontFamily: SYS }}>Toda la banda</span>
               <span style={{ fontSize: 12, color: '#999', fontFamily: SYS }}>({band.length})</span>
             </div>
@@ -2147,7 +2147,7 @@ function VisibilitySheetContent({
             onClick={() => toggleGroup(artists, allArtistsChecked)}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'none', border: 'none', borderBottom: crew.length > 0 ? '0.5px solid #E8E8E8' : 'none', cursor: 'pointer', textAlign: 'left' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#B090F5', flexShrink: 0 }} />
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#A99F49', flexShrink: 0 }} />
               <span style={{ fontSize: 15, fontWeight: 600, color: '#1a1a1a', fontFamily: SYS }}>Todos los artistas</span>
               <span style={{ fontSize: 12, color: '#999', fontFamily: SYS }}>({artists.length})</span>
             </div>
@@ -2159,7 +2159,7 @@ function VisibilitySheetContent({
             onClick={() => toggleGroup(crew, allCrewChecked)}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#A99F49', flexShrink: 0 }} />
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#DC412C', flexShrink: 0 }} />
               <span style={{ fontSize: 15, fontWeight: 600, color: '#1a1a1a', fontFamily: SYS }}>Todo el crew</span>
               <span style={{ fontSize: 12, color: '#999', fontFamily: SYS }}>({crew.length})</span>
             </div>

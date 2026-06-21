@@ -786,7 +786,7 @@ export default function TourClient({
 
               {/* Código Artista */}
               <div style={{ background: '#F5F5F5', borderRadius: 14, padding: '16px', marginBottom: 12 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#DC412C', margin: '0 0 4px', fontFamily: SYS }}>Código Artista</p>
+                <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#A99F49', margin: '0 0 4px', fontFamily: SYS }}>Código Artista</p>
                 <p style={{ fontSize: 11, color: '#999', margin: '0 0 10px', fontFamily: SYS }}>Artista o artistas principales de la gira</p>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                   <span style={{ fontSize: 32, fontWeight: 800, letterSpacing: '0.4em', color: '#1a1a1a', fontFamily: 'monospace' }}>
@@ -822,7 +822,7 @@ export default function TourClient({
 
               {/* Código Crew */}
               <div style={{ background: '#F5F5F5', borderRadius: 14, padding: '16px', marginBottom: 24 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#D0B53C', margin: '0 0 4px', fontFamily: SYS }}>Código Crew</p>
+                <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#DC412C', margin: '0 0 4px', fontFamily: SYS }}>Código Crew</p>
                 <p style={{ fontSize: 11, color: '#999', margin: '0 0 10px', fontFamily: SYS }}>Crew de la gira</p>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                   <span style={{ fontSize: 32, fontWeight: 800, letterSpacing: '0.4em', color: '#1a1a1a', fontFamily: 'monospace' }}>
