@@ -72,10 +72,6 @@ export default function LoginPage() {
             {loading ? 'Entrando…' : 'Entrar'}
           </button>
 
-          <p style={{ fontSize: 14, color: '#999', textAlign: 'center', margin: 0 }}>
-            ¿Sin cuenta?{' '}
-            <a href="/register" style={{ color: '#1a1a1a', fontWeight: 600, textDecoration: 'none' }}>Crear cuenta</a>
-          </p>
         </div>
       </div>
     </div>
