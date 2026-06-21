@@ -16,6 +16,9 @@ function formatDay(d: string) {
 function formatMonth(d: string) {
   return new Date(d + 'T00:00:00').toLocaleDateString('es-ES', { month: 'short' }).toUpperCase().replace('.', '')
 }
+function formatWeekday(d: string) {
+  return new Date(d + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'short' }).toUpperCase().replace('.', '')
+}
 
 function Portal({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
@@ -501,6 +504,7 @@ export default function TourClient({
                   }}>
                     <span style={{ fontSize: 22, fontWeight: 800, color: '#1a1a1a', lineHeight: 1, fontFamily: SYS }}>{formatDay(show.date)}</span>
                     <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#1a1a1a', opacity: 0.65, marginTop: 2, fontFamily: SYS }}>{formatMonth(show.date)}</span>
+                    <span style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#1a1a1a', opacity: 0.4, marginTop: 1, fontFamily: SYS }}>{formatWeekday(show.date)}</span>
                   </div>
                   <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     <p style={{ fontSize: 18, fontWeight: 800, color: '#1a1a1a', margin: 0, lineHeight: 1.2, fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{show.venue_name}</p>
@@ -537,6 +541,7 @@ export default function TourClient({
                 }}>
                   <span style={{ fontSize: 22, fontWeight: 800, color: '#6B6560', lineHeight: 1, fontFamily: SYS }}>{formatDay(travel.date)}</span>
                   <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6B6560', marginTop: 2, fontFamily: SYS }}>{formatMonth(travel.date)}</span>
+                  <span style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#6B6560', opacity: 0.6, marginTop: 1, fontFamily: SYS }}>{formatWeekday(travel.date)}</span>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: 15, fontWeight: 600, fontStyle: 'italic', color: '#6B6560', margin: 0, lineHeight: 1.2, fontFamily: SYS }}>Travel Day</p>
