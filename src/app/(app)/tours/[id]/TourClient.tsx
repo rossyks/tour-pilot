@@ -402,8 +402,14 @@ export default function TourClient({
             </div>
             {isAdmin && tab === 'proximos' && (
               <button onClick={() => setSheetOpen(true)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 8px 0', fontSize: 22, lineHeight: 1, color: '#1a1a1a', fontFamily: SYS, fontWeight: 300 }}>
-                +
+                style={{
+                  background: '#1a1a1a', border: 'none', borderRadius: 20,
+                  padding: '5px 12px', marginBottom: 8,
+                  fontSize: 12, fontWeight: 700, color: '#fff',
+                  cursor: 'pointer', fontFamily: SYS, letterSpacing: '0.01em',
+                  display: 'flex', alignItems: 'center', gap: 4,
+                }}>
+                <span style={{ fontSize: 15, lineHeight: 1, marginTop: -1 }}>+</span> Añadir
               </button>
             )}
           </div>
@@ -458,9 +464,11 @@ export default function TourClient({
         )}
 
         {items.map((item, idx) => {
-          // Separator before each show that isn't the first item
-          const separator = item._type === 'show' && idx > 0 ? (
-            <div key={`sep-${idx}`} style={{ width: 120, height: 2, background: '#1a1a1a', borderRadius: 1, margin: '6px 0' }} />
+          // Group items by their show_id; add separator at each group boundary
+          const getShowId = (i: typeof item) => i._type === 'show' ? i.show.id : i.travel.show_id
+          const isNewGroup = idx > 0 && getShowId(item) !== getShowId(items[idx - 1])
+          const separator = isNewGroup ? (
+            <div key={`sep-${idx}`} style={{ width: 72, height: 2, background: '#1a1a1a', borderRadius: 1, margin: '4px 0' }} />
           ) : null
 
           if (item._type === 'show') {
