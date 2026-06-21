@@ -142,6 +142,7 @@ export default function TourClient({
   const [copiedArtist, setCopiedArtist] = useState(false)
   const [copiedCrew, setCopiedCrew] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [createError, setCreateError] = useState<string | null>(null)
   const [pressed, setPressed] = useState<string | null>(null)
   const [tab, setTab] = useState<'proximos' | 'historico'>('proximos')
   const [members, setMembers] = useState<TourMember[]>(initialTourMembers)
@@ -198,22 +199,26 @@ export default function TourClient({
     e.preventDefault()
     if (!form.venue_name || !form.city || !form.date) return
     setSaving(true)
-    const positionIndex = [...shows.map(s => s.date), form.date].sort((a, b) => a.localeCompare(b)).indexOf(form.date)
-    const color = TOUR_COLORS[positionIndex % TOUR_COLORS.length]
-    const { data, error } = await supabase.from('shows').insert({
-      tour_id: initialTour.id,
-      venue_name: form.venue_name,
-      city: form.city,
-      date: form.date,
-      show_time: form.show_time || null,
-      soundcheck_time: form.soundcheck_time || null,
-      status: 'pendiente',
-      color,
-    }).select().single()
-    if (!error && data) {
-      router.push(`/shows/${data.id}`)
+    setCreateError(null)
+    try {
+      const positionIndex = [...shows.map(s => s.date), form.date].sort((a, b) => a.localeCompare(b)).indexOf(form.date)
+      const color = TOUR_COLORS[positionIndex % TOUR_COLORS.length]
+      const { data, error } = await supabase.from('shows').insert({
+        tour_id: initialTour.id,
+        venue_name: form.venue_name,
+        city: form.city,
+        date: form.date,
+        show_time: form.show_time || null,
+        soundcheck_time: form.soundcheck_time || null,
+        status: 'pendiente',
+        color,
+      }).select().single()
+      if (error) { setCreateError(error.message); setSaving(false); return }
+      if (data) router.push(`/shows/${data.id}`)
+    } catch (err: unknown) {
+      setCreateError(err instanceof Error ? err.message : 'Error desconocido')
+      setSaving(false)
     }
-    setSaving(false)
   }
 
   async function handleDeleteShow(showId: string) {
@@ -847,6 +852,9 @@ export default function TourClient({
                   <input type="date" value={form.date} onChange={e => setF('date', e.target.value)}
                     style={{ width: '100%', height: 48, background: '#F5F5F5', border: 'none', borderRadius: 12, padding: '0 14px', fontSize: 16, fontFamily: SYS, boxSizing: 'border-box', outline: 'none', appearance: 'none', WebkitAppearance: 'none' }} />
                 </div>
+                {createError && (
+                  <p style={{ fontSize: 13, color: '#DC412C', margin: '0 0 4px 0', fontFamily: SYS }}>{createError}</p>
+                )}
                 <div style={{ display: 'flex', gap: 10 }}>
                   <button type="button" onClick={closeSheet}
                     style={{ flex: 1, height: 48, background: '#F5F5F5', border: 'none', borderRadius: 12, fontSize: 16, fontWeight: 500, color: '#1a1a1a', cursor: 'pointer', fontFamily: SYS }}>
@@ -854,7 +862,7 @@ export default function TourClient({
                   </button>
                   <button type="submit" disabled={saving || !form.venue_name || !form.city || !form.date}
                     style={{ flex: 1, height: 48, background: '#1a1a1a', border: 'none', borderRadius: 12, fontSize: 16, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: SYS, opacity: (saving || !form.venue_name || !form.city || !form.date) ? 0.4 : 1 }}>
-                    {saving ? '…' : 'Crear'}
+                    {saving ? 'Creando...' : 'Crear'}
                   </button>
                 </div>
               </form>

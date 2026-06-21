@@ -164,6 +164,8 @@ function VenueAddressSheet({ open, onClose, onSave }: {
   const [results, setResults] = useState<NominatimResult[]>([])
   const [saving, setSaving] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 100) }, [open])
 
   function handleChange(q: string) {
     setQuery(q)
@@ -202,8 +204,10 @@ function VenueAddressSheet({ open, onClose, onSave }: {
         <p style={{ fontWeight: 700, fontSize: 18, margin: '0 0 16px 0', fontFamily: SYS }}>Editar dirección</p>
 
         <input
-          autoFocus value={query} onChange={e => handleChange(e.target.value)}
+          ref={inputRef}
+          type="text" value={query} onChange={e => handleChange(e.target.value)}
           placeholder="Buscar dirección..."
+          autoComplete="off" autoCorrect="off" spellCheck={false} inputMode="text"
           style={{ width: '100%', background: '#F5F5F5', border: 'none', borderRadius: 12, height: 48, padding: '0 14px', fontSize: 16, fontFamily: SYS, outline: 'none', boxSizing: 'border-box', marginBottom: results.length ? 8 : 0 }}
         />
 
@@ -381,8 +385,10 @@ function HotelEditSheet({ open, onClose, initialName, initialPhone, onSave }: {
   const [phone, setPhone] = useState(initialPhone)
   const [saving, setSaving] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => { setQuery(initialName); setPhone(initialPhone); setSelected(null); setResults([]) }, [open, initialName, initialPhone])
+  useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 100) }, [open])
 
   function handleChange(q: string) {
     setQuery(q); setSelected(null)
@@ -433,8 +439,9 @@ function HotelEditSheet({ open, onClose, initialName, initialPhone, onSave }: {
         {/* Search */}
         <div style={{ position: 'relative', marginBottom: 10 }}>
           <p style={{ fontSize: 11, color: '#999', margin: '0 0 4px 0', fontFamily: SYS }}>Nombre del hotel</p>
-          <input autoFocus value={query} onChange={e => handleChange(e.target.value)}
+          <input ref={inputRef} type="text" value={query} onChange={e => handleChange(e.target.value)}
             placeholder="Buscar hotel…"
+            autoComplete="off" autoCorrect="off" spellCheck={false} inputMode="text"
             style={{ width: '100%', background: '#F5F5F5', border: 'none', borderRadius: 12, padding: '12px 14px', fontSize: 15, fontFamily: SYS, outline: 'none', boxSizing: 'border-box' }} />
           {results.length > 0 && (
             <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 14, overflow: 'hidden', zIndex: 10, marginTop: 4 }}>
@@ -483,6 +490,8 @@ function SchedLocationSheet({ open, onClose, onSave }: {
   const [results, setResults] = useState<NominatimResult[]>([])
   const [saving, setSaving] = useState(false)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 100) }, [open])
 
   function handleChange(q: string) {
     setQuery(q)
@@ -521,8 +530,9 @@ function SchedLocationSheet({ open, onClose, onSave }: {
       <div onClick={handleClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }} />
       <div style={panelStyle}>
         <p style={{ fontWeight: 700, fontSize: 18, margin: '0 0 14px 0', fontFamily: SYS }}>Añadir dirección</p>
-        <input autoFocus value={query} onChange={e => handleChange(e.target.value)}
+        <input ref={inputRef} type="text" value={query} onChange={e => handleChange(e.target.value)}
           placeholder="Buscar dirección…"
+          autoComplete="off" autoCorrect="off" spellCheck={false} inputMode="text"
           style={{ width: '100%', background: '#F5F5F5', border: 'none', borderRadius: 12, padding: '12px 14px', fontSize: 16, fontFamily: SYS, outline: 'none', marginBottom: results.length ? 8 : 0, boxSizing: 'border-box' }} />
         {results.length > 0 && (
           <div style={{ background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 14, overflow: 'hidden' }}>
