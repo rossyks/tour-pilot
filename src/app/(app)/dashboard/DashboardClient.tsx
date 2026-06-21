@@ -430,19 +430,19 @@ export default function DashboardClient({
                   onTouchEnd={() => setPressed(null)}
                   style={{
                     backgroundColor: nextShow.color ?? TOUR_COLORS[0],
-                    borderRadius: 20, padding: '20px 20px 18px', cursor: 'pointer',
+                    borderRadius: 20, padding: '14px 18px 14px', cursor: 'pointer',
                     transform: pressed === 'next' ? 'scale(0.97)' : 'scale(1)',
                     transition: 'transform 0.15s ease',
                     boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
                   }}>
-                  <p style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', margin: '0 0 4px 0', fontFamily: SYS, lineHeight: 1.15 }}>
+                  <p style={{ fontSize: 22, fontWeight: 800, color: '#1a1a1a', margin: '0 0 2px 0', fontFamily: SYS, lineHeight: 1.15 }}>
                     {nextShow.venue_name}
                   </p>
                   <p style={{ fontSize: 14, fontStyle: 'italic', color: 'rgba(26,26,26,0.7)', margin: '0 0 2px 0', fontFamily: SYS }}>
                     {nextShow.city} · {fmtFull(nextShow.date)}
                   </p>
                   {nextShow.tourName && (
-                    <p style={{ fontSize: 12, color: 'rgba(26,26,26,0.5)', margin: '0 0 18px 0', fontFamily: SYS }}>
+                    <p style={{ fontSize: 12, color: 'rgba(26,26,26,0.5)', margin: '0 0 10px 0', fontFamily: SYS }}>
                       {nextShow.tourName}
                     </p>
                   )}
