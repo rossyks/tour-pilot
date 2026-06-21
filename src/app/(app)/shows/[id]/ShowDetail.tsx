@@ -542,25 +542,13 @@ function SchedLocationSheet({ open, onClose, onSave }: {
   )
 }
 
-function Lightbox({ url, onClose }: { url: string | null; onClose: () => void }) {
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => { setMounted(true) }, [])
-  useScrollLock(!!url)
-
-  useEffect(() => {
-    if (!url) return
-    window.history.pushState(null, '', window.location.href)
-    const handlePop = () => onClose()
-    window.addEventListener('popstate', handlePop)
-    return () => window.removeEventListener('popstate', handlePop)
-  }, [url, onClose])
-
-  if (!url || !mounted) return null
+function ImageViewer({ url, onClose }: { url: string; onClose: () => void }) {
+  useScrollLock(true)
   return createPortal(
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+      <button onClick={onClose} style={{ position: 'fixed', top: 20, right: 20, width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', border: 'none', color: '#fff', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10000 }}>×</button>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={url} alt="" onClick={e => e.stopPropagation()} style={{ maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain' }} />
-      <button onClick={onClose} style={{ position: 'fixed', top: 16, right: 16, zIndex: 10000, width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+      <img src={url} alt="" onClick={e => e.stopPropagation()} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: 8 }} />
     </div>,
     document.body
   )
@@ -1311,8 +1299,8 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
         </Section>
       </div>
 
-      {/* Lightbox */}
-      <Lightbox url={lightboxUrl} onClose={() => setLightboxUrl(null)} />
+      {/* Image viewer */}
+      {lightboxUrl && <ImageViewer url={lightboxUrl} onClose={() => setLightboxUrl(null)} />}
 
       {/* ── Horario ── */}
       <div style={{ padding: '0 16px' }}>
