@@ -1375,20 +1375,17 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
 
         {/* Timeline */}
         <div style={{ position: 'relative', marginBottom: 28, paddingLeft: 0 }}>
-          {/* Vertical line */}
-          {schedule.length > 0 && (
-            <div style={{ position: 'absolute', left: 67, top: 6, bottom: 6, width: 1, background: '#E8E8E8', zIndex: 0 }} />
-          )}
 
           {schedule.length === 0 && !addingSched && (
             <p style={{ fontSize: 15, color: '#C0C0C0', margin: 0 }}>Sin horario todavía</p>
           )}
 
-          {visibleSchedule.map((item) => {
+          {visibleSchedule.map((item, idx) => {
             const isExpanded = expandedSchedId === item.id
             const ed = getEdit(item.id, item)
             const linkedContact = contacts.find(c => c.id === item.contact_id)
             const isSchedRestricted = !!(localSchedVis[item.id] && localSchedVis[item.id].size > 0)
+            const isLast = idx === visibleSchedule.length - 1
 
             const edInp: React.CSSProperties = {
               width: '100%', boxSizing: 'border-box', background: '#fff', border: '0.5px solid #E8E8E8',
@@ -1405,8 +1402,12 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
                     </p>
                     {item.time_end && <p style={{ fontSize: 12, color: '#999', margin: '2px 0 0 0', lineHeight: 1.2, fontFamily: SYS }}>{t5(item.time_end)}</p>}
                   </div>
-                  <div style={{ width: 16, flexShrink: 0, display: 'flex', justifyContent: 'center', marginTop: 4, zIndex: 1 }}>
-                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: isSchedRestricted ? '#CCCCCC' : '#1a1a1a' }} />
+                  {/* Dot + connector line only to next item when not expanded */}
+                  <div style={{ width: 16, flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 4, zIndex: 1 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: isSchedRestricted ? '#CCCCCC' : '#1a1a1a', flexShrink: 0 }} />
+                    {!isLast && !isExpanded && (
+                      <div style={{ width: 1, flex: 1, minHeight: 22, background: '#E8E8E8', marginTop: 4 }} />
+                    )}
                   </div>
                   <div style={{ flex: 1, minWidth: 0, paddingLeft: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 4 }}>
