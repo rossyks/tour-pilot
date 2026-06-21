@@ -204,8 +204,10 @@ export default function TourClient({
     setSaving(true)
     setCreateError(null)
     try {
-      const positionIndex = [...shows.map(s => s.date), form.date].sort((a, b) => a.localeCompare(b)).indexOf(form.date)
+      const dates = [...shows.map(s => s.date), form.date].sort((a, b) => a.localeCompare(b))
+      const positionIndex = Math.max(0, dates.indexOf(form.date))
       const color = TOUR_COLORS[positionIndex % TOUR_COLORS.length]
+      console.log('[create show] venue:', form.venue_name, 'city:', form.city, 'date:', form.date, 'tour_id:', initialTour.id, 'color:', color)
       const { data, error } = await supabase.from('shows').insert({
         tour_id: initialTour.id,
         venue_name: form.venue_name,
@@ -216,9 +218,11 @@ export default function TourClient({
         status: 'pendiente',
         color,
       }).select().single()
+      console.log('[create show] result:', data, 'error:', error)
       if (error) { setCreateError(error.message); setSaving(false); return }
       if (data) router.push(`/shows/${data.id}`)
     } catch (err: unknown) {
+      console.error('[create show] exception:', err)
       setCreateError(err instanceof Error ? err.message : 'Error desconocido')
       setSaving(false)
     }

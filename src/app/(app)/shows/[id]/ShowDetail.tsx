@@ -2096,7 +2096,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
 
 function CheckBox({ checked, onChange }: { checked: boolean; onChange: () => void }) {
   return (
-    <button onClick={onChange} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}>
+    <button onClick={e => { e.stopPropagation(); onChange() }} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}>
       <div style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${checked ? '#1a1a1a' : '#D0D0D0'}`, background: checked ? '#1a1a1a' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {checked && <span style={{ color: '#fff', fontSize: 13, lineHeight: 1 }}>✓</span>}
       </div>
