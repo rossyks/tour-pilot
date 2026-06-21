@@ -45,7 +45,7 @@ export default function LoginPage() {
 
         {/* Logo */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.svg" alt="Tour Pilot" height={22} style={{ display: 'block', marginBottom: 48 }} />
+        <img src="/logo.svg" alt="Tour Pilot" height={16} style={{ display: 'block', marginBottom: 48 }} />
 
         {/* Headline */}
         <p style={{ fontSize: 22, fontWeight: 800, color: '#1a1a1a', margin: '0 0 6px', fontFamily: SYS, lineHeight: 1.2 }}>
