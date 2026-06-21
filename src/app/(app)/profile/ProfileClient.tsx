@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { TOUR_COLORS } from '@/lib/types'
 
 const SYS = "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif"
+const USERNAME_RE = /^[a-z0-9_]+$/
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
@@ -65,9 +66,18 @@ export default function ProfileClient({
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [resetMsg, setResetMsg] = useState<string | null>(null)
 
-  const name = profile?.full_name ?? null
-  const username = profile?.username ?? null
-  const initials = getInitials(name, email)
+  const [displayName, setDisplayName] = useState<string | null>(profile?.full_name ?? null)
+  const [editingName, setEditingName] = useState(false)
+  const [nameInput, setNameInput] = useState(profile?.full_name ?? '')
+  const [nameError, setNameError] = useState<string | null>(null)
+
+  const [displayUsername, setDisplayUsername] = useState<string | null>(profile?.username ?? null)
+  const [editingUsername, setEditingUsername] = useState(false)
+  const [usernameInput, setUsernameInput] = useState(profile?.username ?? '')
+  const [usernameError, setUsernameError] = useState<string | null>(null)
+  const [savingUsername, setSavingUsername] = useState(false)
+
+  const initials = getInitials(displayName, email)
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -104,21 +114,87 @@ export default function ProfileClient({
     setTimeout(() => setResetMsg(null), 5000)
   }
 
+  function startEditName() {
+    setNameInput(displayName ?? '')
+    setNameError(null)
+    setEditingName(true)
+  }
+
+  async function saveName() {
+    const trimmed = nameInput.trim()
+    if (!trimmed) { setNameError('El nombre no puede estar vacío'); return }
+    if (!profile?.id) return
+    const { error } = await supabase.from('profiles').update({ full_name: trimmed }).eq('id', profile.id)
+    if (error) { setNameError('Error al guardar'); return }
+    setDisplayName(trimmed)
+    setEditingName(false)
+    setNameError(null)
+  }
+
+  function cancelName() {
+    setEditingName(false)
+    setNameError(null)
+  }
+
+  function startEditUsername() {
+    setUsernameInput(displayUsername ?? '')
+    setUsernameError(null)
+    setEditingUsername(true)
+  }
+
+  async function saveUsername() {
+    const val = usernameInput.trim().toLowerCase()
+    if (val.length < 3 || val.length > 20) { setUsernameError('Entre 3 y 20 caracteres'); return }
+    if (!USERNAME_RE.test(val)) { setUsernameError('Solo letras minúsculas, números y _'); return }
+    if (!profile?.id) return
+    setSavingUsername(true)
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', val)
+      .neq('id', profile.id)
+      .maybeSingle()
+    if (existing) { setUsernameError('Este username ya está en uso'); setSavingUsername(false); return }
+    const { error } = await supabase.from('profiles').update({ username: val }).eq('id', profile.id)
+    setSavingUsername(false)
+    if (error) { setUsernameError('Error al guardar'); return }
+    setDisplayUsername(val)
+    setEditingUsername(false)
+    setUsernameError(null)
+  }
+
+  function cancelUsername() {
+    setEditingUsername(false)
+    setUsernameError(null)
+  }
+
   const rowStyle: React.CSSProperties = {
-    height: 52, padding: '0 16px', display: 'flex',
+    minHeight: 52, padding: '0 16px', display: 'flex',
     justifyContent: 'space-between', alignItems: 'center',
+    borderBottom: '0.5px solid #F5F5F5', cursor: 'pointer',
+  }
+
+  const editRowStyle: React.CSSProperties = {
+    minHeight: 52, padding: '10px 16px', display: 'flex',
+    flexDirection: 'column', justifyContent: 'center',
     borderBottom: '0.5px solid #F5F5F5',
+    background: '#F5F5F5', gap: 4,
+  }
+
+  const underlineInput: React.CSSProperties = {
+    fontSize: 14, fontWeight: 500, color: '#1a1a1a', fontFamily: SYS,
+    background: 'transparent', border: 'none', borderBottom: '1.5px solid #1a1a1a',
+    outline: 'none', width: '100%', padding: '4px 0',
   }
 
   return (
     <div className="tp-page" style={{ minHeight: '100vh', background: '#fff', maxWidth: 390, margin: '0 auto', paddingBottom: 100, fontFamily: SYS }}>
 
-      {/* ── Header ── */}
+      {/* Header */}
       <div style={{ padding: '20px 16px 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.svg" alt="Tour Pilot" height={32} style={{ display: 'block', alignSelf: 'flex-start', maxWidth: 160, marginBottom: 20 }} />
 
-        {/* Avatar */}
         <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
         <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => fileRef.current?.click()}>
           <div style={{
@@ -128,7 +204,7 @@ export default function ProfileClient({
           }}>
             {avatarUrl && !avatarError ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarUrl} alt={name ?? email} style={{ width: 80, height: 80, objectFit: 'cover' }} onError={() => setAvatarError(true)} />
+              <img src={avatarUrl} alt={displayName ?? email} style={{ width: 80, height: 80, objectFit: 'cover' }} onError={() => setAvatarError(true)} />
             ) : (
               <span style={{ fontSize: 28, fontWeight: 800, color: '#fff', fontFamily: SYS }}>{initials}</span>
             )}
@@ -144,38 +220,102 @@ export default function ProfileClient({
         {uploadError && (
           <p style={{ fontSize: 12, color: '#DC412C', margin: '8px 0 0', fontFamily: SYS, textAlign: 'center' }}>{uploadError}</p>
         )}
-        {/* Name */}
         <p style={{ fontSize: 22, fontWeight: 800, color: '#1a1a1a', margin: '12px 0 0', fontFamily: SYS, textAlign: 'center' }}>
-          {name ?? email}
+          {displayName ?? email}
         </p>
-        {username && (
+        {displayUsername && (
           <p style={{ fontSize: 14, color: '#999', margin: '4px 0 0', fontFamily: SYS, textAlign: 'center' }}>
-            @{username}
+            @{displayUsername}
           </p>
         )}
       </div>
 
       <div style={{ padding: '0 16px' }}>
 
-        {/* ── Info card ── */}
+        {/* Info card */}
         <div style={{ background: '#fff', borderRadius: 16, overflow: 'hidden', marginTop: 24 }}>
-          <div style={rowStyle}>
+
+          {/* Email (read-only) */}
+          <div style={{ ...rowStyle, cursor: 'default' }}>
             <span style={{ fontSize: 14, color: '#999', fontFamily: SYS }}>Email</span>
             <span style={{ fontSize: 14, fontWeight: 500, color: '#1a1a1a', fontFamily: SYS, maxWidth: '60%', textAlign: 'right', wordBreak: 'break-all' }}>{email}</span>
           </div>
-          {username && (
-            <div style={rowStyle}>
-              <span style={{ fontSize: 14, color: '#999', fontFamily: SYS }}>Usuario</span>
-              <span style={{ fontSize: 14, fontWeight: 500, color: '#1a1a1a', fontFamily: SYS }}>@{username}</span>
+
+          {/* Nombre */}
+          {editingName ? (
+            <div style={editRowStyle}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 14, color: '#999', fontFamily: SYS }}>Nombre</span>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <button onClick={cancelName} style={{ background: 'none', border: 'none', fontSize: 13, color: '#999', cursor: 'pointer', fontFamily: SYS, padding: 0 }}>Cancelar</button>
+                  <button onClick={saveName} style={{ background: 'none', border: 'none', fontSize: 13, color: '#1a1a1a', fontWeight: 700, cursor: 'pointer', fontFamily: SYS, padding: 0 }}>Guardar</button>
+                </div>
+              </div>
+              <input
+                autoFocus
+                value={nameInput}
+                onChange={e => setNameInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') cancelName() }}
+                style={underlineInput}
+              />
+              {nameError && <span style={{ fontSize: 12, color: '#DC412C', fontFamily: SYS }}>{nameError}</span>}
+            </div>
+          ) : (
+            <div style={rowStyle} onClick={startEditName}>
+              <span style={{ fontSize: 14, color: '#999', fontFamily: SYS }}>Nombre</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 14, fontWeight: 500, color: '#1a1a1a', fontFamily: SYS }}>{displayName ?? '—'}</span>
+                <span style={{ fontSize: 12, color: '#CCC' }}>✏️</span>
+              </div>
             </div>
           )}
-          <div style={{ ...rowStyle, borderBottom: 'none' }}>
+
+          {/* Username */}
+          {editingUsername ? (
+            <div style={{ ...editRowStyle, borderBottom: 'none' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 14, color: '#999', fontFamily: SYS }}>Usuario</span>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <button onClick={cancelUsername} style={{ background: 'none', border: 'none', fontSize: 13, color: '#999', cursor: 'pointer', fontFamily: SYS, padding: 0 }}>Cancelar</button>
+                  <button onClick={saveUsername} disabled={savingUsername} style={{ background: 'none', border: 'none', fontSize: 13, color: '#1a1a1a', fontWeight: 700, cursor: 'pointer', fontFamily: SYS, padding: 0, opacity: savingUsername ? 0.5 : 1 }}>
+                    {savingUsername ? '...' : 'Guardar'}
+                  </button>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span style={{ fontSize: 14, color: '#999', fontFamily: SYS, marginRight: 2 }}>@</span>
+                <input
+                  autoFocus
+                  value={usernameInput}
+                  onChange={e => setUsernameInput(e.target.value.toLowerCase())}
+                  onKeyDown={e => { if (e.key === 'Enter') saveUsername(); if (e.key === 'Escape') cancelUsername() }}
+                  style={{ ...underlineInput, flex: 1 }}
+                  maxLength={20}
+                  placeholder="minusculas, numeros o _"
+                />
+              </div>
+              {usernameError && <span style={{ fontSize: 12, color: '#DC412C', fontFamily: SYS }}>{usernameError}</span>}
+            </div>
+          ) : (
+            <div style={{ ...rowStyle, borderBottom: 'none' }} onClick={startEditUsername}>
+              <span style={{ fontSize: 14, color: '#999', fontFamily: SYS }}>Usuario</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 14, fontWeight: 500, color: '#1a1a1a', fontFamily: SYS }}>
+                  {displayUsername ? `@${displayUsername}` : '—'}
+                </span>
+                <span style={{ fontSize: 12, color: '#CCC' }}>✏️</span>
+              </div>
+            </div>
+          )}
+
+          {/* Miembro desde */}
+          <div style={{ ...rowStyle, borderBottom: 'none', cursor: 'default', borderTop: '0.5px solid #F5F5F5' }}>
             <span style={{ fontSize: 14, color: '#999', fontFamily: SYS }}>Miembro desde</span>
             <span style={{ fontSize: 14, fontWeight: 500, color: '#1a1a1a', fontFamily: SYS }}>{formatDate(createdAt)}</span>
           </div>
         </div>
 
-        {/* ── Mis giras ── */}
+        {/* Mis giras */}
         <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#999', margin: '24px 0 8px 4px', fontFamily: SYS }}>
           Mis giras
         </p>
@@ -212,7 +352,7 @@ export default function ProfileClient({
           })}
         </div>
 
-        {/* ── Cambiar contraseña ── */}
+        {/* Cambiar contraseña */}
         <div style={{ background: '#fff', borderRadius: 16, overflow: 'hidden', marginTop: 16 }}>
           <button onClick={handleResetPassword} style={{
             width: '100%', height: 52, padding: '0 16px',
@@ -227,7 +367,7 @@ export default function ProfileClient({
           <p style={{ fontSize: 13, color: '#2ECC71', margin: '8px 4px 0', fontFamily: SYS }}>{resetMsg}</p>
         )}
 
-        {/* ── Cerrar sesión ── */}
+        {/* Cerrar sesión */}
         <button onClick={handleSignOut} style={{
           width: '100%', background: 'none', border: 'none',
           fontSize: 15, color: '#DC412C', cursor: 'pointer',

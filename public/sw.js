@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tourpilot-v1'
+const CACHE_NAME = 'tourpilot-v2'
 const urlsToCache = ['/', '/dashboard', '/login']
 
 self.addEventListener('install', event => {
