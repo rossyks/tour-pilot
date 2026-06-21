@@ -503,7 +503,7 @@ export default function TourClient({
                     padding: '8px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   }}>
                     <span style={{ fontSize: 22, fontWeight: 800, color: '#1a1a1a', lineHeight: 1, fontFamily: SYS }}>{formatDay(show.date)}</span>
-                    <span style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#1a1a1a', opacity: 0.55, marginTop: 2, fontFamily: SYS }}>{formatMonth(show.date)} · {formatWeekday(show.date)}</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#1a1a1a', opacity: 0.65, marginTop: 2, fontFamily: SYS }}>{formatMonth(show.date)}</span>
                   </div>
                   <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     <p style={{ fontSize: 18, fontWeight: 800, color: '#1a1a1a', margin: 0, lineHeight: 1.2, fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{show.venue_name}</p>
@@ -539,7 +539,7 @@ export default function TourClient({
                   padding: '6px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                 }}>
                   <span style={{ fontSize: 22, fontWeight: 800, color: '#6B6560', lineHeight: 1, fontFamily: SYS }}>{formatDay(travel.date)}</span>
-                  <span style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: '#6B6560', opacity: 0.7, marginTop: 2, fontFamily: SYS }}>{formatMonth(travel.date)} · {formatWeekday(travel.date)}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6B6560', marginTop: 2, fontFamily: SYS }}>{formatMonth(travel.date)}</span>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: 15, fontWeight: 600, fontStyle: 'italic', color: '#6B6560', margin: 0, lineHeight: 1.2, fontFamily: SYS }}>Travel Day</p>

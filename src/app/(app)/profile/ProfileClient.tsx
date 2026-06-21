@@ -23,10 +23,10 @@ const ROLE_LABEL: Record<string, string> = {
   owner: '♛ Owner', admin: 'Admin', band: 'Banda', artist: 'Artista', crew: 'Crew',
 }
 const ROLE_BG: Record<string, string> = {
-  owner: '#1a1a1a', admin: '#333', band: '#A4B2DA', artist: '#B090F5', crew: '#D0B53C',
+  owner: '#1a1a1a', admin: '#333', band: '#A4B2DA', artist: '#A99F49', crew: '#DC412C',
 }
 const ROLE_TEXT: Record<string, string> = {
-  owner: '#fff', admin: '#fff', band: '#1a1a1a', artist: '#fff', crew: '#1a1a1a',
+  owner: '#fff', admin: '#fff', band: '#1a1a1a', artist: '#1a1a1a', crew: '#fff',
 }
 
 interface Membership {
