@@ -1008,42 +1008,42 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
     doc.setFillColor(rgb.r, rgb.g, rgb.b)
     doc.rect(0, 0, W, 2, 'F')
 
-    // Tour Pilot logo (left)
+    // Tour Pilot logo (left) — 36x9mm (ratio 4:1)
     const tpLogo = await imgToBase64(window.location.origin + '/logo-print.png')
     if (tpLogo) {
-      doc.addImage(tpLogo, 'PNG', M, 6, 36, 12.5)
+      doc.addImage(tpLogo, 'PNG', M, 10, 36, 9)
     }
 
-    // Band logo (right) if available
+    // Band logo (right) if available — max 32x10mm
     if (bandLogoUrl) {
       try {
         const bl = await imgToBase64(bandLogoUrl)
         if (bl) {
           const format = bl.startsWith('data:image/png') ? 'PNG' : 'JPEG'
-          doc.addImage(bl, format, W - M - 36, 6, 36, 12, undefined, 'FAST')
+          doc.addImage(bl, format, W - M - 32, 10, 32, 10, undefined, 'FAST')
         }
       } catch { /* skip band logo if it fails */ }
     }
 
     // Divider
     doc.setDrawColor(232, 232, 232); doc.setLineWidth(0.3)
-    doc.line(M, 22, W - M, 22)
+    doc.line(M, 26, W - M, 26)
 
     // Venue + city · date
     doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(26, 26, 26)
-    doc.text(data.venue_name, M, 32, { maxWidth: W - M * 2 })
+    doc.text(data.venue_name, M, 37, { maxWidth: W - M * 2 })
     doc.setFont('helvetica', 'bolditalic'); doc.setFontSize(10); doc.setTextColor(120, 120, 120)
-    doc.text(`${data.city}  ·  ${fmtFull(data.date)}`, M, 39)
+    doc.text(`${data.city}  ·  ${fmtFull(data.date)}`, M, 44)
 
     // Thin line under title
     doc.setDrawColor(232, 232, 232); doc.setLineWidth(0.3)
-    doc.line(M, 43, W - M, 43)
+    doc.line(M, 48, W - M, 48)
 
-    let y = 52
+    let y = 56
 
     // ── Bloque 1 — Info técnica ──────────────────────────────────────────────────
     doc.setFillColor(245, 245, 245)
-    doc.roundedRect(M, y, W - M * 2, 26, 3, 3, 'F')
+    doc.roundedRect(M, y, W - M * 2, 20, 3, 3, 'F')
 
     const colW = (W - M * 2) / 3
     const infoCols = [
@@ -1052,15 +1052,15 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
       { label: 'PANTALLA', value: data.has_screen ? 'SÍ' : 'NO', sub: data.has_screen && data.screen_resolution ? data.screen_resolution : '' },
     ]
     infoCols.forEach((col, i) => {
-      const cx = M + i * colW + 8
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(153, 153, 153)
-      doc.text(col.label, cx, y + 8)
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(26, 26, 26)
-      doc.text(col.value, cx, y + 18)
-      if (col.sub) { doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(153, 153, 153); doc.text(col.sub, cx, y + 24) }
-      if (i < 2) { doc.setDrawColor(232, 232, 232); doc.setLineWidth(0.3); doc.line(M + (i + 1) * colW, y + 3, M + (i + 1) * colW, y + 24) }
+      const cx = M + i * colW + 6
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(153, 153, 153)
+      doc.text(col.label, cx, y + 6)
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(26, 26, 26)
+      doc.text(col.value, cx, y + 14)
+      if (col.sub) { doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(153, 153, 153); doc.text(col.sub, cx, y + 19) }
+      if (i < 2) { doc.setDrawColor(232, 232, 232); doc.setLineWidth(0.3); doc.line(M + (i + 1) * colW, y + 2, M + (i + 1) * colW, y + 19) }
     })
-    y += 36
+    y += 28
 
     // ── Bloque 2 — Day Sheet ──────────────────────────────────────────────────
     if (schedule.length > 0) {
