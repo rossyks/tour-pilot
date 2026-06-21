@@ -182,7 +182,7 @@ export default function DashboardClient({
 }: {
   tours: Tour[]
   tourStats: Record<string, { count: number; nextDate: string | null }>
-  nextShow: { id: string; venue_name: string; city: string; date: string; color: string | null; tourName: string | null } | null
+  nextShow: { id: string; venue_name: string; city: string; date: string; color: string | null; tourName: string | null; show_time: string | null; show_duration: number | null } | null
   isAdmin: boolean
   adminTourIds: string[]
 }) {
@@ -203,6 +203,48 @@ export default function DashboardClient({
   const [deleteTarget, setDeleteTarget] = useState<Tour | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [joinSuccess, setJoinSuccess] = useState<string | null>(null)
+
+  type CountdownState = { hours: number; minutes: number; seconds: number; live: boolean } | null
+  const [countdown, setCountdown] = useState<CountdownState>(null)
+
+  useEffect(() => {
+    if (!nextShow?.show_time) { setCountdown(null); return }
+    const compute = () => {
+      const now = new Date()
+      const [h, m] = nextShow.show_time!.split(':').map(Number)
+      const showStart = new Date(nextShow.date + 'T' + nextShow.show_time!)
+      showStart.setFullYear(now.getFullYear(), now.getMonth(), now.getDate())
+      // If show date is in the future, use the actual date
+      const [sy, smth, sd] = nextShow.date.split('-').map(Number)
+      const actualStart = new Date(sy, smth - 1, sd, h, m, 0)
+      const diffMs = actualStart.getTime() - now.getTime()
+      const diffHours = diffMs / (1000 * 60 * 60)
+      if (diffHours > 24 || diffHours < -(nextShow.show_duration ?? 120)) {
+        setCountdown(null)
+        return
+      }
+      if (diffMs <= 0) {
+        // Show has started — check if still live
+        const endMs = actualStart.getTime() + (nextShow.show_duration ?? 120) * 60 * 1000
+        if (now.getTime() < endMs) {
+          setCountdown({ hours: 0, minutes: 0, seconds: 0, live: true })
+        } else {
+          setCountdown(null)
+        }
+        return
+      }
+      const totalSec = Math.floor(diffMs / 1000)
+      setCountdown({
+        hours: Math.floor(totalSec / 3600),
+        minutes: Math.floor((totalSec % 3600) / 60),
+        seconds: totalSec % 60,
+        live: false,
+      })
+    }
+    compute()
+    const id = setInterval(compute, 1000)
+    return () => clearInterval(id)
+  }, [nextShow])
 
   useScrollLock(sheetOpen || joinOpen || !!deleteTarget)
 
@@ -398,7 +440,34 @@ export default function DashboardClient({
                     </p>
                   )}
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                    {days === 0 ? (
+                    {countdown?.live ? (
+                      <span style={{
+                        fontSize: 22, fontWeight: 800, color: '#DC412C', fontFamily: SYS,
+                        animation: 'pulse 1.2s ease-in-out infinite',
+                      }}>EN DIRECTO</span>
+                    ) : countdown ? (() => {
+                      const urgent = countdown.hours === 0 && countdown.minutes < 60
+                      const col = urgent ? '#DC412C' : '#1a1a1a'
+                      const pad = (n: number) => String(n).padStart(2, '0')
+                      return (
+                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4 }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <span style={{ fontSize: 32, fontWeight: 800, color: col, lineHeight: 1, fontFamily: SYS }}>{pad(countdown.hours)}</span>
+                            <span style={{ fontSize: 10, color: 'rgba(26,26,26,0.5)', fontFamily: SYS, marginTop: 2 }}>h</span>
+                          </div>
+                          <span style={{ fontSize: 28, fontWeight: 800, color: col, lineHeight: 1, fontFamily: SYS, marginBottom: 4 }}>:</span>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <span style={{ fontSize: 32, fontWeight: 800, color: col, lineHeight: 1, fontFamily: SYS }}>{pad(countdown.minutes)}</span>
+                            <span style={{ fontSize: 10, color: 'rgba(26,26,26,0.5)', fontFamily: SYS, marginTop: 2 }}>min</span>
+                          </div>
+                          <span style={{ fontSize: 28, fontWeight: 800, color: col, lineHeight: 1, fontFamily: SYS, marginBottom: 4 }}>:</span>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <span style={{ fontSize: 32, fontWeight: 800, color: col, lineHeight: 1, fontFamily: SYS }}>{pad(countdown.seconds)}</span>
+                            <span style={{ fontSize: 10, color: 'rgba(26,26,26,0.5)', fontFamily: SYS, marginTop: 2 }}>seg</span>
+                          </div>
+                        </div>
+                      )
+                    })() : days === 0 ? (
                       <span style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', fontFamily: SYS }}>HOY</span>
                     ) : days === 1 ? (
                       <span style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', fontFamily: SYS }}>MAÑANA</span>
