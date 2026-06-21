@@ -537,32 +537,32 @@ export default function TourClient({
                 style={{
                   display: 'flex', alignItems: 'stretch',
                   borderRadius: 10, overflow: 'hidden',
-                  background: '#FAFAFA', border: '1px solid #F0F0F0',
+                  background: '#fff', border: '1px solid #EFEFEF',
                   transform: pressed === travel.id ? 'scale(0.98)' : 'scale(1)',
                   transition: 'transform 0.12s ease',
                   cursor: 'pointer',
                 }}>
                 {/* No accent — just neutral placeholder */}
-                <div style={{ width: 4, flexShrink: 0, background: '#E8E8E8' }} />
+                <div style={{ width: 4, flexShrink: 0, background: '#E0E0E0' }} />
                 {/* Date block */}
                 <div style={{
                   width: 58, flexShrink: 0, padding: '10px 0',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  borderRight: '1px solid #EEEEEE',
+                  borderRight: '1px solid #F0F0F0',
                 }}>
-                  <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#CCCCCC', fontFamily: SYS, lineHeight: 1 }}>{formatWeekday(travel.date)}</span>
-                  <span style={{ fontSize: 20, fontWeight: 700, color: '#BBBBBB', lineHeight: 1, fontFamily: SYS, marginTop: 3 }}>{formatDay(travel.date)}</span>
-                  <span style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#CCCCCC', fontFamily: SYS, marginTop: 2 }}>{formatMonth(travel.date)}</span>
+                  <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#BBBBBB', fontFamily: SYS, lineHeight: 1 }}>{formatWeekday(travel.date)}</span>
+                  <span style={{ fontSize: 20, fontWeight: 700, color: '#888', lineHeight: 1, fontFamily: SYS, marginTop: 3 }}>{formatDay(travel.date)}</span>
+                  <span style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#BBBBBB', fontFamily: SYS, marginTop: 2 }}>{formatMonth(travel.date)}</span>
                 </div>
                 {/* Info */}
                 <div style={{ flex: 1, minWidth: 0, padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  <p style={{ fontSize: 12, fontWeight: 600, color: '#AAAAAA', margin: 0, fontFamily: SYS, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Viaje</p>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: '#999', margin: 0, fontFamily: SYS, fontStyle: 'italic' }}>Travel Day</p>
                   {travel.destination && (
                     <p style={{ fontSize: 12, color: '#BBBBBB', margin: '2px 0 0 0', fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{travel.destination}</p>
                   )}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', paddingRight: 14 }}>
-                  <span style={{ fontSize: 13, color: '#DDDDDD', fontFamily: SYS }}>›</span>
+                  <span style={{ fontSize: 13, color: '#BBBBBB', fontFamily: SYS }}>›</span>
                 </div>
               </div>
             </Link>
