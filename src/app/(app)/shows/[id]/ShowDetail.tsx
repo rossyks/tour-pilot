@@ -989,17 +989,31 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
     const W = 210
     const M = 16
 
-    // helper: fetch image URL → base64 data URL
-    async function imgToBase64(url: string): Promise<string | null> {
+    // helper: fetch image URL → { dataUrl, w, h }
+    async function fetchImg(url: string): Promise<{ dataUrl: string; w: number; h: number } | null> {
       try {
         const res = await fetch(url)
         const blob = await res.blob()
-        return await new Promise<string>(resolve => {
+        const dataUrl = await new Promise<string>(resolve => {
           const reader = new FileReader()
           reader.onload = () => resolve(reader.result as string)
           reader.readAsDataURL(blob)
         })
+        const { w, h } = await new Promise<{ w: number; h: number }>(resolve => {
+          const img = new Image()
+          img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight })
+          img.onerror = () => resolve({ w: 1, h: 1 })
+          img.src = dataUrl
+        })
+        return { dataUrl, w, h }
       } catch { return null }
+    }
+    // fit image inside maxW×maxH preserving aspect ratio
+    function fitDims(w: number, h: number, maxW: number, maxH: number): { fw: number; fh: number } {
+      const ratio = w / h
+      let fw = maxW, fh = maxW / ratio
+      if (fh > maxH) { fh = maxH; fw = maxH * ratio }
+      return { fw, fh }
     }
 
     // ── Header ──────────────────────────────────────────────────────────────────
@@ -1008,21 +1022,23 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
     doc.setFillColor(rgb.r, rgb.g, rgb.b)
     doc.rect(0, 0, W, 2, 'F')
 
-    // Tour Pilot logo (left) — 44x11mm (ratio 4:1)
-    const tpLogo = await imgToBase64(window.location.origin + '/logo-print.png')
-    if (tpLogo) {
-      doc.addImage(tpLogo, 'PNG', M, 9, 44, 11)
+    // Tour Pilot logo (left) — max 44×14mm, ratio preserved
+    const tp = await fetchImg(window.location.origin + '/logo-print.png')
+    if (tp) {
+      const { fw, fh } = fitDims(tp.w, tp.h, 44, 14)
+      doc.addImage(tp.dataUrl, 'PNG', M, 9 + (14 - fh) / 2, fw, fh)
     }
 
-    // Band logo (right) if available — max height 14mm, width auto up to 44mm
+    // Band logo (right) — max 44×14mm, ratio preserved
     if (bandLogoUrl) {
       try {
-        const bl = await imgToBase64(bandLogoUrl)
+        const bl = await fetchImg(bandLogoUrl)
         if (bl) {
-          const format = bl.startsWith('data:image/png') ? 'PNG' : 'JPEG'
-          doc.addImage(bl, format, W - M - 44, 9, 44, 14, undefined, 'FAST')
+          const fmt = bl.dataUrl.startsWith('data:image/png') ? 'PNG' : 'JPEG'
+          const { fw, fh } = fitDims(bl.w, bl.h, 44, 14)
+          doc.addImage(bl.dataUrl, fmt, W - M - fw, 9 + (14 - fh) / 2, fw, fh, undefined, 'FAST')
         }
-      } catch { /* skip band logo if it fails */ }
+      } catch { /* skip */ }
     }
 
     // Divider
