@@ -488,7 +488,7 @@ export default function DashboardClient({
                     </div>
                     {/* Hora del show */}
                     {nextShow.show_time && !countdown?.live && (
-                      <div style={{ background: 'rgba(255,255,255,0.35)', borderRadius: 14, padding: '10px 14px', display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', paddingLeft: 4 }}>
                         <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(26,26,26,0.5)', fontFamily: SYS, marginBottom: 2 }}>SHOW</span>
                         <span style={{ fontSize: 18, fontWeight: 800, color: '#1a1a1a', fontFamily: SYS, lineHeight: 1 }}>
                           {nextShow.show_time.slice(0, 5)}
