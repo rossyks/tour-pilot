@@ -1,0 +1,28 @@
+{
+  "name": "Tour Pilot",
+  "short_name": "Tour Pilot",
+  "description": "Gestión de giras para bandas",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F4F2",
+  "theme_color": "#1a1a1a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
