@@ -1390,137 +1390,147 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
             const linkedContact = contacts.find(c => c.id === item.contact_id)
             const isSchedRestricted = !!(localSchedVis[item.id] && localSchedVis[item.id].size > 0)
 
+            const edInp: React.CSSProperties = {
+              width: '100%', boxSizing: 'border-box', background: '#fff', border: '0.5px solid #E8E8E8',
+              borderRadius: 10, padding: '0 12px', height: 44, fontSize: 15, fontFamily: SYS,
+              outline: 'none', color: '#1a1a1a', WebkitAppearance: 'none' as const,
+            }
             return (
-              <div key={item.id} style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: 0, marginBottom: 16 }}>
-                {/* Time column */}
-                <div style={{ width: 60, flexShrink: 0 }}>
-                  <p style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a', margin: 0, lineHeight: 1.2, fontFamily: SYS }}>
-                    {t5(item.time_start)}{item.next_day && <sup style={{ fontSize: 9, color: '#999', fontWeight: 400, marginLeft: 2 }}>+1</sup>}
-                  </p>
-                  {item.time_end && <p style={{ fontSize: 12, color: '#999', margin: '2px 0 0 0', lineHeight: 1.2, fontFamily: SYS }}>{t5(item.time_end)}</p>}
-                </div>
-
-                {/* Dot */}
-                <div style={{ width: 16, flexShrink: 0, display: 'flex', justifyContent: 'center', marginTop: 4, zIndex: 1 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: isSchedRestricted ? '#CCCCCC' : '#1a1a1a' }} />
-                </div>
-
-                {/* Content */}
-                <div style={{ flex: 1, minWidth: 0, paddingLeft: 10 }}>
-                  {!isExpanded ? (
+              <div key={item.id} style={{ marginBottom: isExpanded ? 12 : 16 }}>
+                {/* Row: time + dot + title */}
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: 0 }}>
+                  <div style={{ width: 60, flexShrink: 0 }}>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a', margin: 0, lineHeight: 1.2, fontFamily: SYS }}>
+                      {t5(item.time_start)}{item.next_day && <sup style={{ fontSize: 9, color: '#999', fontWeight: 400, marginLeft: 2 }}>+1</sup>}
+                    </p>
+                    {item.time_end && <p style={{ fontSize: 12, color: '#999', margin: '2px 0 0 0', lineHeight: 1.2, fontFamily: SYS }}>{t5(item.time_end)}</p>}
+                  </div>
+                  <div style={{ width: 16, flexShrink: 0, display: 'flex', justifyContent: 'center', marginTop: 4, zIndex: 1 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: isSchedRestricted ? '#CCCCCC' : '#1a1a1a' }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0, paddingLeft: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 4 }}>
-                    <button onClick={() => isAdmin ? setExpandedSchedId(item.id) : undefined}
-                      style={{ display: 'block', flex: 1, textAlign: 'left', background: 'none', border: 'none', padding: 0, cursor: isAdmin ? 'pointer' : 'default' }}>
-                      <p style={{ fontSize: 15, fontWeight: 600, color: '#1a1a1a', margin: '0 0 2px 0', lineHeight: 1.3, fontFamily: SYS }}>{item.title}</p>
-                      {/* Subtitle: text, contact, or location */}
-                      {linkedContact && (
-                        <p style={{ fontSize: 13, color: '#999', margin: '0 0 1px 0', fontFamily: SYS }}>
-                          {linkedContact.name}{linkedContact.role ? ` · ${linkedContact.role}` : ''}
-                          {linkedContact.phone && <> · <a href={`tel:${linkedContact.phone}`} onClick={e => e.stopPropagation()} style={{ color: '#007AFF', textDecoration: 'none' }}>{linkedContact.phone}</a></>}
-                        </p>
-                      )}
-                      {item.location_address && (
-                        <button onClick={e => { e.stopPropagation(); setSchedMapSheet(item.id) }}
-                          style={{ fontSize: 13, color: '#007AFF', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: SYS, textAlign: 'left' }}>
-                          {item.location_address.split(',')[0]}
+                      <button onClick={() => isAdmin ? setExpandedSchedId(isExpanded ? null : item.id) : undefined}
+                        style={{ display: 'block', flex: 1, textAlign: 'left', background: 'none', border: 'none', padding: 0, cursor: isAdmin ? 'pointer' : 'default' }}>
+                        <p style={{ fontSize: 15, fontWeight: 600, color: '#1a1a1a', margin: '0 0 2px 0', lineHeight: 1.3, fontFamily: SYS }}>{item.title}</p>
+                        {linkedContact && (
+                          <p style={{ fontSize: 13, color: '#999', margin: '0 0 1px 0', fontFamily: SYS }}>
+                            {linkedContact.name}{linkedContact.role ? ` · ${linkedContact.role}` : ''}
+                            {linkedContact.phone && <> · <a href={`tel:${linkedContact.phone}`} onClick={e => e.stopPropagation()} style={{ color: '#007AFF', textDecoration: 'none' }}>{linkedContact.phone}</a></>}
+                          </p>
+                        )}
+                        {item.location_address && (
+                          <button onClick={e => { e.stopPropagation(); setSchedMapSheet(item.id) }}
+                            style={{ fontSize: 13, color: '#007AFF', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: SYS, textAlign: 'left' }}>
+                            {item.location_address.split(',')[0]}
+                          </button>
+                        )}
+                        {!linkedContact && !item.location_address && item.subtitle && (
+                          <p style={{ fontSize: 13, color: '#999', margin: 0, fontFamily: SYS }}>{item.subtitle}</p>
+                        )}
+                      </button>
+                      {isAdmin && !isExpanded && (
+                        <button onClick={e => { e.stopPropagation(); setVisSheet({ type: 'schedule', id: item.id }) }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', flexShrink: 0 }}>
+                          <span style={{ position: 'relative', fontSize: 14, lineHeight: 1 }}>
+                            👁
+                            {isSchedRestricted && (
+                              <span style={{ position: 'absolute', top: -2, right: -2, width: 7, height: 7, background: '#DC412C', borderRadius: '50%', border: '1.5px solid #fff' }} />
+                            )}
+                          </span>
                         </button>
                       )}
-                      {!linkedContact && !item.location_address && item.subtitle && (
-                        <p style={{ fontSize: 13, color: '#999', margin: 0, fontFamily: SYS }}>{item.subtitle}</p>
-                      )}
-                    </button>
-                    {isAdmin && (
-                      <button onClick={e => { e.stopPropagation(); setVisSheet({ type: 'schedule', id: item.id }) }}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', flexShrink: 0 }}>
-                        <span style={{ position: 'relative', fontSize: 14, lineHeight: 1 }}>
-                          👁
-                          {isSchedRestricted && (
-                            <span style={{ position: 'absolute', top: -2, right: -2, width: 7, height: 7, background: '#DC412C', borderRadius: '50%', border: '1.5px solid #fff' }} />
-                          )}
-                        </span>
-                      </button>
-                    )}
                     </div>
-                  ) : (
-                    /* Inline editor */
-                    <div style={{ background: '#F5F5F5', borderRadius: 14, padding: '12px 14px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-                        <button onClick={() => deleteSched(item.id)}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#C0C0C0', fontSize: 16, padding: 0, minWidth: 28, minHeight: 28 }}>✕</button>
+                  </div>
+                </div>
+
+                {/* Full-width editor — below the row */}
+                {isExpanded && (
+                  <div style={{ marginTop: 10, background: '#F5F5F5', borderRadius: 14, padding: '14px 14px 16px', boxSizing: 'border-box' }}>
+                    {/* Horas */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
+                      <div>
+                        <p style={{ fontSize: 11, color: '#999', margin: '0 0 4px 0', fontFamily: SYS }}>Inicio</p>
+                        <input type="time" defaultValue={t5(item.time_start)}
+                          onChange={e => setEdit(item.id, { time_start: e.target.value })}
+                          style={edInp} />
                       </div>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
-                        <div>
-                          <p style={{ fontSize: 11, color: '#999', margin: '0 0 3px 0', fontFamily: SYS }}>Inicio</p>
-                          <input type="time" defaultValue={t5(item.time_start)}
-                            onChange={e => setEdit(item.id, { time_start: e.target.value })}
-                            style={{ ...inputStyle, fontSize: 14 }} />
-                        </div>
-                        <div>
-                          <p style={{ fontSize: 11, color: '#999', margin: '0 0 3px 0', fontFamily: SYS }}>Fin</p>
-                          <input type="time" defaultValue={t5(item.time_end ?? '')}
-                            onChange={e => setEdit(item.id, { time_end: e.target.value || null })}
-                            style={{ ...inputStyle, fontSize: 14 }} />
+                      <div>
+                        <p style={{ fontSize: 11, color: '#999', margin: '0 0 4px 0', fontFamily: SYS }}>Fin</p>
+                        <input type="time" defaultValue={t5(item.time_end ?? '')}
+                          onChange={e => setEdit(item.id, { time_end: e.target.value || null })}
+                          style={edInp} />
+                      </div>
+                    </div>
+                    {/* Título */}
+                    <div style={{ marginBottom: 8 }}>
+                      <p style={{ fontSize: 11, color: '#999', margin: '0 0 4px 0', fontFamily: SYS }}>Título</p>
+                      <input type="text" defaultValue={item.title}
+                        onChange={e => setEdit(item.id, { title: e.target.value })}
+                        style={edInp} />
+                    </div>
+                    {/* Subtítulo */}
+                    <div style={{ marginBottom: 10 }}>
+                      <p style={{ fontSize: 11, color: '#999', margin: '0 0 4px 0', fontFamily: SYS }}>Subtítulo</p>
+                      <input type="text" defaultValue={item.subtitle ?? ''}
+                        onChange={e => setEdit(item.id, { subtitle: e.target.value || null })}
+                        style={edInp} />
+                    </div>
+                    {/* next_day toggle */}
+                    {(() => { const h = parseInt((ed.time_start ?? item.time_start).split(':')[0]); return h < 6 ? (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                        <span style={{ fontSize: 13, color: '#999', fontFamily: SYS }}>¿Madrugada del día siguiente?</span>
+                        <div onClick={() => setEdit(item.id, { next_day: !(ed.next_day ?? item.next_day) })}
+                          style={{ width: 44, height: 26, borderRadius: 13, background: (ed.next_day ?? item.next_day) ? '#1a1a1a' : '#E0E0E0', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0 }}>
+                          <div style={{ position: 'absolute', top: 3, left: (ed.next_day ?? item.next_day) ? 21 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
                         </div>
                       </div>
-                      <div style={{ marginBottom: 8 }}>
-                        <p style={{ fontSize: 11, color: '#999', margin: '0 0 3px 0', fontFamily: SYS }}>Título</p>
-                        <input type="text" defaultValue={item.title}
-                          onChange={e => setEdit(item.id, { title: e.target.value })}
-                          style={{ ...inputStyle, fontSize: 14 }} />
+                    ) : null })()}
+                    {/* Contacto / Dirección vinculados */}
+                    {linkedContact && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, padding: '8px 12px', background: '#fff', borderRadius: 10 }}>
+                        <span style={{ fontSize: 13, flex: 1, fontFamily: SYS }}>{linkedContact.name}{linkedContact.role ? ` · ${linkedContact.role}` : ''}</span>
+                        <button onClick={async () => { await saveSchedField(item.id, 'contact_id', null); setEdit(item.id, { contact_id: null }) }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#C0C0C0', fontSize: 16, lineHeight: 1, padding: 0 }}>✕</button>
                       </div>
-                      <div style={{ marginBottom: 10 }}>
-                        <p style={{ fontSize: 11, color: '#999', margin: '0 0 3px 0', fontFamily: SYS }}>Subtítulo (texto libre)</p>
-                        <input type="text" defaultValue={item.subtitle ?? ''}
-                          onChange={e => setEdit(item.id, { subtitle: e.target.value || null })}
-                          style={{ ...inputStyle, fontSize: 14 }} />
+                    )}
+                    {item.location_address && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, padding: '8px 12px', background: '#fff', borderRadius: 10 }}>
+                        <span style={{ fontSize: 13, flex: 1, color: '#007AFF', fontFamily: SYS }}>{item.location_address.split(',')[0]}</span>
+                        <button onClick={async () => { await saveSchedField(item.id, 'location_address', null); await saveSchedField(item.id, 'location_lat', null); await saveSchedField(item.id, 'location_lng', null) }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#C0C0C0', fontSize: 16, lineHeight: 1, padding: 0 }}>✕</button>
                       </div>
-                      {/* next_day toggle — only when start < 06:00 */}
-                      {(() => { const h = parseInt((ed.time_start ?? item.time_start).split(':')[0]); return h < 6 ? (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                          <span style={{ fontSize: 13, color: '#999', fontFamily: SYS }}>¿Madrugada del día siguiente?</span>
-                          <div onClick={() => setEdit(item.id, { next_day: !(ed.next_day ?? item.next_day) })}
-                            style={{ width: 44, height: 26, borderRadius: 13, background: (ed.next_day ?? item.next_day) ? '#1a1a1a' : '#E0E0E0', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0 }}>
-                            <div style={{ position: 'absolute', top: 3, left: (ed.next_day ?? item.next_day) ? 21 : 3, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
-                          </div>
-                        </div>
-                      ) : null })()}
-                      {/* Linked contact */}
-                      {linkedContact && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, padding: '6px 10px', background: '#fff', borderRadius: 10 }}>
-                          <span style={{ fontSize: 13, flex: 1, fontFamily: SYS }}>{linkedContact.name}{linkedContact.role ? ` · ${linkedContact.role}` : ''}</span>
-                          <button onClick={async () => { await saveSchedField(item.id, 'contact_id', null); setEdit(item.id, { contact_id: null }) }}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#C0C0C0', fontSize: 13 }}>✕</button>
-                        </div>
-                      )}
-                      {/* Linked location */}
-                      {item.location_address && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, padding: '6px 10px', background: '#fff', borderRadius: 10 }}>
-                          <span style={{ fontSize: 13, flex: 1, color: '#007AFF', fontFamily: SYS }}>{item.location_address.split(',')[0]}</span>
-                          <button onClick={async () => { await saveSchedField(item.id, 'location_address', null); await saveSchedField(item.id, 'location_lat', null); await saveSchedField(item.id, 'location_lng', null) }}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#C0C0C0', fontSize: 13 }}>✕</button>
-                        </div>
-                      )}
+                    )}
+                    {/* Añadir contacto / dirección */}
+                    {(!linkedContact || !item.location_address) && (
                       <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
                         {!linkedContact && (
                           <button onClick={() => setSchedContactSheet(item.id)}
-                            style={{ fontSize: 12, fontWeight: 600, background: '#fff', border: '1px solid #E0E0E0', borderRadius: 20, padding: '5px 12px', cursor: 'pointer', fontFamily: SYS }}>
+                            style={{ fontSize: 12, fontWeight: 600, background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 20, padding: '6px 14px', minHeight: 32, cursor: 'pointer', fontFamily: SYS }}>
                             + Contacto
                           </button>
                         )}
                         {!item.location_address && (
                           <button onClick={() => setSchedLocSheet(item.id)}
-                            style={{ fontSize: 12, fontWeight: 600, background: '#fff', border: '1px solid #E0E0E0', borderRadius: 20, padding: '5px 12px', cursor: 'pointer', fontFamily: SYS }}>
+                            style={{ fontSize: 12, fontWeight: 600, background: '#fff', border: '0.5px solid #E0E0E0', borderRadius: 20, padding: '6px 14px', minHeight: 32, cursor: 'pointer', fontFamily: SYS }}>
                             + Dirección
                           </button>
                         )}
                       </div>
+                    )}
+                    {/* Acciones */}
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button onClick={() => deleteSched(item.id)}
+                        style={{ flex: 1, height: 40, background: 'none', border: '0.5px solid #E8E8E8', borderRadius: 20, fontSize: 13, fontWeight: 600, color: '#DC412C', cursor: 'pointer', fontFamily: SYS }}>
+                        Eliminar
+                      </button>
                       <button onClick={async () => { await saveSchedEdit(item.id, item); setExpandedSchedId(null) }}
-                        style={{ width: '100%', background: '#1a1a1a', color: '#fff', border: 'none', borderRadius: 20, height: 40, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: SYS }}>
+                        style={{ flex: 2, height: 40, background: '#1a1a1a', color: '#fff', border: 'none', borderRadius: 20, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: SYS }}>
                         Listo
                       </button>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             )
           })}
