@@ -320,32 +320,16 @@ export default function TourClient({
 
       {/* Header */}
       <div style={{ padding: '48px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="Tour Pilot" height={28} style={{ display: 'block', maxWidth: 140 }} />
-          {bandLogoUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={bandLogoUrl} alt="Band logo" style={{ maxHeight: 24, width: 'auto', maxWidth: 80, objectFit: 'contain' }} />
-          )}
-          {isAdmin && (
-            <button onClick={() => setTeamSheetOpen(true)} style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="22" height="18" viewBox="0 0 22 18" fill="none">
-                <circle cx="8" cy="5" r="3.5" stroke="#1a1a1a" strokeWidth="1.5"/>
-                <path d="M1 17c0-3.87 3.13-7 7-7s7 3.13 7 7" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
-                <circle cx="17" cy="5" r="2.5" stroke="#1a1a1a" strokeWidth="1.5"/>
-                <path d="M15 17c0-2.21 1.79-4 4-4" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </button>
-          )}
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.svg" alt="Tour Pilot" height={28} style={{ display: 'block', maxWidth: 140 }} />
         <button onClick={() => router.push('/dashboard')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, minHeight: 44 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           <span style={{ fontSize: 14, fontWeight: 500, color: '#1a1a1a', fontFamily: SYS }}>Giras</span>
         </button>
       </div>
 
-      {/* Tour title — editable for admin */}
-      <div style={{ padding: '16px 20px 24px', display: 'flex', alignItems: 'center', gap: 12 }}>
+      {/* Subheader — tour name + fechas + band logo + team */}
+      <div style={{ padding: '12px 20px 24px', display: 'flex', alignItems: 'center', gap: 10 }}>
         {isAdmin && editingName ? (
           <input
             autoFocus
@@ -374,7 +358,17 @@ export default function TourClient({
         <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: '#1a1a1a', borderRadius: 20, padding: '4px 10px', flexShrink: 0, fontFamily: SYS, whiteSpace: 'nowrap' }}>{fechaLabel}</span>
         {bandLogoUrl && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={bandLogoUrl} alt="Band logo" style={{ maxHeight: 24, width: 'auto', maxWidth: 80, objectFit: 'contain', flexShrink: 0 }} />
+          <img src={bandLogoUrl} alt="Band logo" style={{ maxHeight: 22, width: 'auto', maxWidth: 80, objectFit: 'contain', flexShrink: 0 }} />
+        )}
+        {isAdmin && (
+          <button onClick={() => setTeamSheetOpen(true)} style={{ padding: 4, background: 'none', border: 'none', cursor: 'pointer', minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="22" height="18" viewBox="0 0 22 18" fill="none">
+              <circle cx="8" cy="5" r="3.5" stroke="#1a1a1a" strokeWidth="1.5"/>
+              <path d="M1 17c0-3.87 3.13-7 7-7s7 3.13 7 7" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
+              <circle cx="17" cy="5" r="2.5" stroke="#1a1a1a" strokeWidth="1.5"/>
+              <path d="M15 17c0-2.21 1.79-4 4-4" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </button>
         )}
       </div>
 
