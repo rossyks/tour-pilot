@@ -585,9 +585,9 @@ export default function TourClient({
                 {members.map(member => {
                   const name = member.profiles?.full_name ?? member.profiles?.username ?? 'Usuario'
                   const initials = name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()
-                  const avatarColors: Record<string, string> = { owner: '#1a1a1a', admin: '#333', band: '#A4B2DA', artist: '#B090F5', crew: '#D0B53C' }
-                  const badgeBg: Record<string, string> = { owner: '#1a1a1a', admin: '#333', band: '#A4B2DA', artist: '#B090F5', crew: '#D0B53C' }
-                  const badgeText: Record<string, string> = { owner: '#fff', admin: '#fff', band: '#1a1a1a', artist: '#fff', crew: '#1a1a1a' }
+                  const avatarColors: Record<string, string> = { owner: '#1a1a1a', admin: '#1a1a1a', band: '#A4B2DA', artist: '#A99F49', crew: '#DC412C' }
+                  const badgeBg: Record<string, string> = { owner: '#1a1a1a', admin: '#1a1a1a', band: '#A4B2DA', artist: '#A99F49', crew: '#DC412C' }
+                  const badgeText: Record<string, string> = { owner: '#fff', admin: '#fff', band: '#1a1a1a', artist: '#1a1a1a', crew: '#fff' }
                   const roleLabels: Record<string, string> = { owner: 'Owner', admin: 'Admin', band: 'Banda', artist: 'Artista', crew: 'Crew' }
                   const isSelf = member.user_id === userId
                   const targetIsOwner = member.user_id === initialTour.owner_id || member.role === 'owner'
