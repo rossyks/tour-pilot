@@ -22,8 +22,9 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
     supabase.from('shows').select('id').eq('tour_id', show.tour_id).order('date', { ascending: true }),
   ])
 
+  // tourShows ordered by date ASC — index = positional color
   const showIndex = (tourShows ?? []).findIndex((s: { id: string }) => s.id === id)
-  const showColor = show.color ?? TOUR_COLORS[Math.max(showIndex, 0) % TOUR_COLORS.length]
+  const showColor = TOUR_COLORS[Math.max(showIndex, 0) % TOUR_COLORS.length]
 
   const myMembership = user
     ? (tourMembers ?? []).find((m: { user_id: string; role: string }) => m.user_id === user.id)

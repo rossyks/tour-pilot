@@ -198,7 +198,8 @@ export default function TourClient({
     e.preventDefault()
     if (!form.venue_name || !form.city || !form.date) return
     setSaving(true)
-    const color = TOUR_COLORS[shows.length % TOUR_COLORS.length]
+    const positionIndex = [...shows.map(s => s.date), form.date].sort((a, b) => a.localeCompare(b)).indexOf(form.date)
+    const color = TOUR_COLORS[positionIndex % TOUR_COLORS.length]
     const { data, error } = await supabase.from('shows').insert({
       tour_id: initialTour.id,
       venue_name: form.venue_name,
@@ -287,13 +288,15 @@ export default function TourClient({
 
   const today = new Date().toISOString().split('T')[0]
 
+  // Assign colors by sorted date position — never from DB field
+  const sortedShows = [...shows].sort((a, b) => a.date.localeCompare(b.date))
+  const showColorMap = new Map(sortedShows.map((s, i) => [s.id, TOUR_COLORS[i % TOUR_COLORS.length]]))
+
   // Build intercalated list (all items)
   const allItems: ListItem[] = [
     ...shows.map((show, i) => ({ _type: 'show' as const, show, showIndex: i })),
     ...travelDays.map(travel => {
-      const linkedShow = shows.find(s => s.id === travel.show_id)
-      const showIndex = shows.findIndex(s => s.id === travel.show_id)
-      const showColor = linkedShow?.color ?? TOUR_COLORS[showIndex % TOUR_COLORS.length] ?? TOUR_COLORS[0]
+      const showColor = showColorMap.get(travel.show_id) ?? TOUR_COLORS[0]
       return { _type: 'travel' as const, travel, showColor }
     }),
   ].sort((a, b) => {
@@ -453,7 +456,7 @@ export default function TourClient({
                   onTouchStart={() => setPressed(show.id)}
                   onTouchEnd={() => setPressed(null)}
                   style={{
-                    backgroundColor: show.color ?? TOUR_COLORS[showIndex % TOUR_COLORS.length],
+                    backgroundColor: showColorMap.get(show.id) ?? TOUR_COLORS[0],
                     borderRadius: 18, padding: '20px 16px', minHeight: 80,
                     cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 18,
                     position: 'relative',
