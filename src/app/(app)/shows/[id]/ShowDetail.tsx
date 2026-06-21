@@ -1043,7 +1043,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
 
     // ── Bloque 1 — Info técnica ──────────────────────────────────────────────────
     doc.setFillColor(245, 245, 245)
-    doc.roundedRect(M, y, W - M * 2, 36, 3, 3, 'F')
+    doc.roundedRect(M, y, W - M * 2, 26, 3, 3, 'F')
 
     const colW = (W - M * 2) / 3
     const infoCols = [
@@ -1054,13 +1054,13 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
     infoCols.forEach((col, i) => {
       const cx = M + i * colW + 8
       doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(153, 153, 153)
-      doc.text(col.label, cx, y + 10)
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(26, 26, 26)
-      doc.text(col.value, cx, y + 23)
-      if (col.sub) { doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(153, 153, 153); doc.text(col.sub, cx, y + 30) }
-      if (i < 2) { doc.setDrawColor(232, 232, 232); doc.setLineWidth(0.3); doc.line(M + (i + 1) * colW, y + 4, M + (i + 1) * colW, y + 33) }
+      doc.text(col.label, cx, y + 8)
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(26, 26, 26)
+      doc.text(col.value, cx, y + 18)
+      if (col.sub) { doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(153, 153, 153); doc.text(col.sub, cx, y + 24) }
+      if (i < 2) { doc.setDrawColor(232, 232, 232); doc.setLineWidth(0.3); doc.line(M + (i + 1) * colW, y + 3, M + (i + 1) * colW, y + 24) }
     })
-    y += 46
+    y += 36
 
     // ── Bloque 2 — Day Sheet ──────────────────────────────────────────────────
     if (schedule.length > 0) {
