@@ -988,24 +988,57 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
     const W = 210
     const M = 16
-    const rgb = hexToRgb(color)
+
+    // helper: fetch image URL → base64 data URL
+    async function imgToBase64(url: string): Promise<string | null> {
+      try {
+        const res = await fetch(url)
+        const blob = await res.blob()
+        return await new Promise<string>(resolve => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result as string)
+          reader.readAsDataURL(blob)
+        })
+      } catch { return null }
+    }
 
     // ── Header ──────────────────────────────────────────────────────────────────
+    // Thin accent bar at top using tour color
+    const rgb = hexToRgb(color)
     doc.setFillColor(rgb.r, rgb.g, rgb.b)
-    doc.rect(0, 0, W, 42, 'F')
+    doc.rect(0, 0, W, 2, 'F')
 
-    doc.setTextColor(255, 255, 255)
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(9)
-    doc.text('TOUR PILOT', M, 12)
+    // Tour Pilot logo (left)
+    const tpLogo = await imgToBase64(window.location.origin + '/logo.svg')
+    if (tpLogo) {
+      doc.addImage(tpLogo, 'SVG', M, 8, 28, 9)
+    } else {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(26, 26, 26)
+      doc.text('TOUR PILOT', M, 14)
+    }
 
-    doc.setFontSize(18)
-    doc.text(data.venue_name, W - M, 17, { align: 'right', maxWidth: W - M * 2 - 40 })
+    // Band logo (right) if available
+    if (bandLogoUrl) {
+      const bl = await imgToBase64(bandLogoUrl)
+      if (bl) {
+        const ext = bandLogoUrl.toLowerCase().includes('.png') ? 'PNG' : 'JPEG'
+        doc.addImage(bl, ext, W - M - 32, 6, 32, 12, undefined, 'FAST')
+      }
+    }
 
-    doc.setFont('helvetica', 'bolditalic')
-    doc.setFontSize(11)
-    doc.setTextColor(255, 255, 255)
-    doc.text(`${data.city}  ·  ${fmtFull(data.date)}`, W - M, 28, { align: 'right' })
+    // Divider
+    doc.setDrawColor(232, 232, 232); doc.setLineWidth(0.3)
+    doc.line(M, 22, W - M, 22)
+
+    // Venue + city · date
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(26, 26, 26)
+    doc.text(data.venue_name, M, 32, { maxWidth: W - M * 2 })
+    doc.setFont('helvetica', 'bolditalic'); doc.setFontSize(10); doc.setTextColor(120, 120, 120)
+    doc.text(`${data.city}  ·  ${fmtFull(data.date)}`, M, 39)
+
+    // Thin line under title
+    doc.setDrawColor(232, 232, 232); doc.setLineWidth(0.3)
+    doc.line(M, 43, W - M, 43)
 
     let y = 52
 
