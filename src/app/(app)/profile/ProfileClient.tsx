@@ -116,7 +116,7 @@ export default function ProfileClient({
       {/* ── Header ── */}
       <div style={{ padding: '20px 16px 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.svg" alt="Tour Pilot" style={{ display: 'block', alignSelf: 'flex-start', height: 28, maxWidth: 140, marginBottom: 20 }} />
+        <img src="/logo.svg" alt="Tour Pilot" height={32} style={{ display: 'block', alignSelf: 'flex-start', maxWidth: 160, marginBottom: 20 }} />
 
         {/* Avatar */}
         <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
