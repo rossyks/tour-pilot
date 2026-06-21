@@ -1120,8 +1120,8 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
           {/* SHOW */}
           <div onClick={() => { if (isAdmin) { setShowForm({ time: t5(data.show_time), duration: data.show_duration ? String(data.show_duration) : '' }); setInfoSheet('show') } }}
             style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', padding: '10px 14px', cursor: isAdmin ? 'pointer' : 'default' }}>
-            <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', fontFamily: SYS, height: 16, display: 'block' }}>Show</span>
-            <span style={{ fontSize: 18, fontWeight: 700, color: data.show_time ? '#1a1a1a' : '#CCC', fontFamily: SYS, lineHeight: 1 }}>{t5(data.show_time) || '—'}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', fontFamily: SYS, height: 16, display: 'block', marginBottom: 8 }}>Show</span>
+            <span style={{ fontSize: 16, fontWeight: 700, color: data.show_time ? '#1a1a1a' : '#CCC', fontFamily: SYS, lineHeight: 1 }}>{t5(data.show_time) || '—'}</span>
             <span style={{ fontSize: 11, color: '#999', fontFamily: SYS, marginTop: 3, minHeight: 14 }}>{data.show_duration ? `${data.show_duration} min` : ''}</span>
           </div>
 
@@ -1130,10 +1130,10 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
             style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', padding: '10px 14px', borderLeft: '1px solid #E8E8E8', borderRight: '1px solid #E8E8E8', cursor: isAdmin ? 'pointer' : 'default' }}>
             <button
               onClick={e => { e.stopPropagation(); if (isAdmin) update('check_type', checkType === 'linecheck' ? 'soundcheck' : 'linecheck') }}
-              style={{ background: 'none', border: 'none', padding: 0, cursor: isAdmin ? 'pointer' : 'default', textAlign: 'left', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', fontFamily: SYS, height: 16, lineHeight: '16px' }}>
+              style={{ background: 'none', border: 'none', padding: 0, cursor: isAdmin ? 'pointer' : 'default', textAlign: 'left', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', fontFamily: SYS, height: 16, lineHeight: '16px', marginBottom: 8 }}>
               {checkType === 'linecheck' ? 'Linecheck' : 'Soundcheck'}
             </button>
-            <span style={{ fontSize: 18, fontWeight: 700, color: data.soundcheck_time ? '#1a1a1a' : '#CCC', fontFamily: SYS, lineHeight: 1 }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: data.soundcheck_time ? '#1a1a1a' : '#CCC', fontFamily: SYS, lineHeight: 1 }}>
               {t5(data.soundcheck_time) || '—'}
             </span>
             <span style={{ fontSize: 11, color: '#999', fontFamily: SYS, marginTop: 3, minHeight: 14 }}>{data.soundcheck_duration ? `${data.soundcheck_duration} min` : ''}</span>
@@ -1142,8 +1142,8 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
           {/* PANTALLA */}
           <div onClick={() => { if (isAdmin) { setPantallaForm({ has_screen: data.has_screen, resolution: data.screen_resolution ?? '' }); setInfoSheet('pantalla') } }}
             style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', padding: '10px 14px', cursor: isAdmin ? 'pointer' : 'default' }}>
-            <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', fontFamily: SYS, height: 16, display: 'block' }}>Pantalla</span>
-            <span style={{ fontSize: 18, fontWeight: 700, color: '#1a1a1a', fontFamily: SYS, lineHeight: 1 }}>{data.has_screen ? 'SÍ' : 'NO'}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', fontFamily: SYS, height: 16, display: 'block', marginBottom: 8 }}>Pantalla</span>
+            <span style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a', fontFamily: SYS, lineHeight: 1 }}>{data.has_screen ? 'SI' : 'NO'}</span>
             <span style={{ fontSize: 11, color: '#999', fontFamily: SYS, marginTop: 3, minHeight: 14 }}>{data.has_screen && data.screen_resolution ? data.screen_resolution : ''}</span>
           </div>
 
