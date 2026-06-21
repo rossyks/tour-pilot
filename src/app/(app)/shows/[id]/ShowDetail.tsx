@@ -542,6 +542,51 @@ function SchedLocationSheet({ open, onClose, onSave }: {
   )
 }
 
+function NotesEditable({ value, onSave, isAdmin }: { value: string | null; onSave: (v: string) => Promise<void>; isAdmin: boolean }) {
+  const [editing, setEditing] = useState(false)
+  const [val, setVal] = useState(value ?? '')
+  const [saving, setSaving] = useState(false)
+  const [focused, setFocused] = useState(false)
+
+  async function save() { setSaving(true); await onSave(val); setSaving(false); setEditing(false) }
+
+  const boxStyle: React.CSSProperties = {
+    width: '100%', boxSizing: 'border-box', background: '#F5F5F5', borderRadius: 12,
+    padding: '12px 14px', minHeight: 80, fontSize: 16, color: '#1a1a1a',
+    fontFamily: SYS, lineHeight: 1.5, border: focused ? '1.5px solid #1a1a1a' : '1.5px solid transparent',
+    transition: 'border 0.15s ease', outline: 'none', resize: 'none',
+  }
+
+  if (!isAdmin) return (
+    <div style={{ ...boxStyle, border: '1.5px solid transparent', cursor: 'default' }}>
+      {value ? <span style={{ whiteSpace: 'pre-wrap' }}>{value}</span> : <span style={{ color: '#AAAAAA' }}>Añade una nota...</span>}
+    </div>
+  )
+
+  if (editing) return (
+    <div style={{ width: '100%' }}>
+      <textarea
+        autoFocus value={val}
+        onChange={e => setVal(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        rows={4}
+        style={boxStyle}
+      />
+      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+        <button onClick={save} style={{ fontSize: 13, fontWeight: 700, background: '#1a1a1a', color: '#fff', padding: '8px 16px', borderRadius: 20, minHeight: 36, border: 'none', cursor: 'pointer', fontFamily: SYS }}>{saving ? '…' : 'Guardar'}</button>
+        <button onClick={() => { setEditing(false); setVal(value ?? '') }} style={{ fontSize: 13, color: '#888', padding: '8px 12px', minHeight: 36, background: 'none', border: 'none', cursor: 'pointer', fontFamily: SYS }}>Cancelar</button>
+      </div>
+    </div>
+  )
+
+  return (
+    <div onClick={() => setEditing(true)} style={{ ...boxStyle, cursor: 'text' }}>
+      {value ? <span style={{ whiteSpace: 'pre-wrap' }}>{value}</span> : <span style={{ color: '#AAAAAA' }}>Añade una nota...</span>}
+    </div>
+  )
+}
+
 function ImageViewer({ url, onClose }: { url: string; onClose: () => void }) {
   useScrollLock(true)
   return createPortal(
@@ -1246,8 +1291,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
       {/* ── Notas ── */}
       <div style={{ padding: '0 16px' }}>
         <Section label="Notas">
-          <Editable value={data.notes} placeholder="Añadir notas…" onSave={v => update('notes', v)} isAdmin={isAdmin}
-            multiline style={{ fontSize: 14, color: '#1a1a1a', lineHeight: 1.5, width: '100%' }} />
+          <NotesEditable value={data.notes} onSave={v => update('notes', v)} isAdmin={isAdmin} />
 
           {/* Adjuntos */}
           {!loadingAttachments && noteAttachments.length > 0 && (
