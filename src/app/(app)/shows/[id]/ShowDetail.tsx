@@ -1009,21 +1009,20 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
     doc.rect(0, 0, W, 2, 'F')
 
     // Tour Pilot logo (left)
-    const tpLogo = await imgToBase64(window.location.origin + '/logo.svg')
+    const tpLogo = await imgToBase64('/logo-print.png')
     if (tpLogo) {
-      doc.addImage(tpLogo, 'SVG', M, 8, 28, 9)
-    } else {
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(26, 26, 26)
-      doc.text('TOUR PILOT', M, 14)
+      doc.addImage(tpLogo, 'PNG', M, 6, 36, 12)
     }
 
     // Band logo (right) if available
     if (bandLogoUrl) {
-      const bl = await imgToBase64(bandLogoUrl)
-      if (bl) {
-        const ext = bandLogoUrl.toLowerCase().includes('.png') ? 'PNG' : 'JPEG'
-        doc.addImage(bl, ext, W - M - 32, 6, 32, 12, undefined, 'FAST')
-      }
+      try {
+        const bl = await imgToBase64(bandLogoUrl)
+        if (bl) {
+          const format = bl.startsWith('data:image/png') ? 'PNG' : 'JPEG'
+          doc.addImage(bl, format, W - M - 36, 6, 36, 12, undefined, 'FAST')
+        }
+      } catch { /* skip band logo if it fails */ }
     }
 
     // Divider
