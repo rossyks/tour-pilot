@@ -569,7 +569,7 @@ function NotesEditable({ value, onSave, isAdmin }: { value: string | null; onSav
 
   if (!isAdmin) return (
     <div style={{ ...boxStyle, border: '1.5px solid transparent', cursor: 'default' }}>
-      {value ? <span style={{ whiteSpace: 'pre-wrap' }}>{value}</span> : <span style={{ color: '#AAAAAA' }}>Silencio en camerinos… aún no hay notas 🎸</span>}
+      {value ? <span style={{ whiteSpace: 'pre-wrap' }}>{value}</span> : <span style={{ color: '#AAAAAA' }}>Silencio en camerinos… aún no hay notas</span>}
     </div>
   )
 
