@@ -1008,38 +1008,38 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
     doc.setFillColor(rgb.r, rgb.g, rgb.b)
     doc.rect(0, 0, W, 2, 'F')
 
-    // Tour Pilot logo (left) — 36x9mm (ratio 4:1)
+    // Tour Pilot logo (left) — 44x11mm (ratio 4:1)
     const tpLogo = await imgToBase64(window.location.origin + '/logo-print.png')
     if (tpLogo) {
-      doc.addImage(tpLogo, 'PNG', M, 10, 36, 9)
+      doc.addImage(tpLogo, 'PNG', M, 9, 44, 11)
     }
 
-    // Band logo (right) if available — max 32x10mm
+    // Band logo (right) if available — max height 14mm, width auto up to 44mm
     if (bandLogoUrl) {
       try {
         const bl = await imgToBase64(bandLogoUrl)
         if (bl) {
           const format = bl.startsWith('data:image/png') ? 'PNG' : 'JPEG'
-          doc.addImage(bl, format, W - M - 32, 10, 32, 10, undefined, 'FAST')
+          doc.addImage(bl, format, W - M - 44, 9, 44, 14, undefined, 'FAST')
         }
       } catch { /* skip band logo if it fails */ }
     }
 
     // Divider
     doc.setDrawColor(232, 232, 232); doc.setLineWidth(0.3)
-    doc.line(M, 26, W - M, 26)
+    doc.line(M, 28, W - M, 28)
 
     // Venue + city · date
     doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(26, 26, 26)
-    doc.text(data.venue_name, M, 37, { maxWidth: W - M * 2 })
+    doc.text(data.venue_name, M, 40, { maxWidth: W - M * 2 })
     doc.setFont('helvetica', 'bolditalic'); doc.setFontSize(10); doc.setTextColor(120, 120, 120)
-    doc.text(`${data.city}  ·  ${fmtFull(data.date)}`, M, 44)
+    doc.text(`${data.city}  ·  ${fmtFull(data.date)}`, M, 47)
 
     // Thin line under title
     doc.setDrawColor(232, 232, 232); doc.setLineWidth(0.3)
-    doc.line(M, 48, W - M, 48)
+    doc.line(M, 51, W - M, 51)
 
-    let y = 56
+    let y = 59
 
     // ── Bloque 1 — Info técnica ──────────────────────────────────────────────────
     doc.setFillColor(245, 245, 245)
