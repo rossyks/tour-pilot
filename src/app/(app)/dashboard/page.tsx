@@ -51,8 +51,12 @@ export default async function DashboardPage() {
     }
   }
 
-  const nextShowTourIndex = nextShow ? tourList.findIndex(t => t.id === nextShow.tour_id) : -1
-  const nextShowColor = nextShow ? (nextShow.color ?? TOUR_COLORS[nextShowTourIndex % TOUR_COLORS.length]) : null
+  const nextShowColor = (() => {
+    if (!nextShow) return null
+    const tourShows = showList.filter(s => s.tour_id === nextShow.tour_id).sort((a, b) => a.date.localeCompare(b.date))
+    const idx = tourShows.findIndex(s => s.id === nextShow.id)
+    return TOUR_COLORS[Math.max(idx, 0) % TOUR_COLORS.length]
+  })()
   const nextShowTour = nextShow ? tourList.find(t => t.id === nextShow.tour_id) ?? null : null
 
   return (
