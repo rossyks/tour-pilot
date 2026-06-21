@@ -542,6 +542,30 @@ function SchedLocationSheet({ open, onClose, onSave }: {
   )
 }
 
+function Lightbox({ url, onClose }: { url: string | null; onClose: () => void }) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+  useScrollLock(!!url)
+
+  useEffect(() => {
+    if (!url) return
+    window.history.pushState(null, '', window.location.href)
+    const handlePop = () => onClose()
+    window.addEventListener('popstate', handlePop)
+    return () => window.removeEventListener('popstate', handlePop)
+  }, [url, onClose])
+
+  if (!url || !mounted) return null
+  return createPortal(
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={url} alt="" onClick={e => e.stopPropagation()} style={{ maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain' }} />
+      <button onClick={onClose} style={{ position: 'fixed', top: 16, right: 16, zIndex: 10000, width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', border: 'none', color: '#fff', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+    </div>,
+    document.body
+  )
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers, ticketVisibility, scheduleVisibility, color: colorProp, bandLogoUrl }: { show: Show; isAdmin: boolean; tourId: string; userId: string | null; tourMembers: TourMember[]; ticketVisibility: TicketVisibility[]; scheduleVisibility: ScheduleVisibility[]; color?: string; bandLogoUrl?: string | null }) {
@@ -1288,15 +1312,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
       </div>
 
       {/* Lightbox */}
-      {lightboxUrl && (
-        <div onClick={() => setLightboxUrl(null)}
-          style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={lightboxUrl} alt="" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-          <button onClick={() => setLightboxUrl(null)}
-            style={{ position: 'absolute', top: 20, right: 20, background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%', width: 40, height: 40, fontSize: 20, color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
-        </div>
-      )}
+      <Lightbox url={lightboxUrl} onClose={() => setLightboxUrl(null)} />
 
       {/* ── Horario ── */}
       <div style={{ padding: '0 16px' }}>
