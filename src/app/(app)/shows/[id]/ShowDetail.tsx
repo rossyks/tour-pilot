@@ -2176,7 +2176,7 @@ function VisibilitySheetContent({
         onClick={() => setIndividualOpen(o => !o)}
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 12px 0', textAlign: 'left' }}>
         <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#999', margin: 0, fontFamily: SYS }}>Individual</p>
-        <span style={{ fontSize: 13, color: '#999', transform: individualOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', display: 'block' }}>▾</span>
+        <span style={{ fontSize: 20, color: '#999', transform: individualOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', display: 'block', lineHeight: 1 }}>▾</span>
       </button>
 
       {individualOpen && (
