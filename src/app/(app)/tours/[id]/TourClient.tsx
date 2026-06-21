@@ -464,9 +464,14 @@ export default function TourClient({
         )}
 
         {items.map((item, idx) => {
-          // Group items by their show_id; add separator at each group boundary
-          const getShowId = (i: typeof item) => i._type === 'show' ? i.show.id : i.travel.show_id
-          const isNewGroup = idx > 0 && getShowId(item) !== getShowId(items[idx - 1])
+          // Group boundary: separator between a group-end and a group-start
+          // group-end = show OR after-travel-day
+          // group-start = show OR before-travel-day
+          const isGroupEnd = (i: typeof item) =>
+            i._type === 'show' || i.travel.direction === 'after'
+          const isGroupStart = (i: typeof item) =>
+            i._type === 'show' || i.travel.direction === 'before'
+          const isNewGroup = idx > 0 && isGroupEnd(items[idx - 1]) && isGroupStart(item)
           const separator = isNewGroup ? (
             <div key={`sep-${idx}`} style={{ width: 72, height: 2, background: '#1a1a1a', borderRadius: 1, margin: '4px 0' }} />
           ) : null
