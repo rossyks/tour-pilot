@@ -467,20 +467,19 @@ export default function TourClient({
         )}
 
         {items.map((item, idx) => {
-          // Group boundary: separator between a group-end and a group-start
-          // group-end = show OR after-travel-day
-          // group-start = show OR before-travel-day
           const isGroupEnd = (i: typeof item) =>
             i._type === 'show' || i.travel.direction === 'after'
           const isGroupStart = (i: typeof item) =>
             i._type === 'show' || i.travel.direction === 'before'
           const isNewGroup = idx > 0 && isGroupEnd(items[idx - 1]) && isGroupStart(item)
-          const separator = isNewGroup ? (
-            <div key={`sep-${idx}`} style={{ width: 72, height: 2, background: '#1a1a1a', borderRadius: 1, margin: '4px 0' }} />
+
+          const groupDivider = isNewGroup ? (
+            <div key={`sep-${idx}`} style={{ height: 1, background: '#EBEBEB', margin: '6px 0' }} />
           ) : null
 
           if (item._type === 'show') {
-            const { show, showIndex } = item
+            const { show } = item
+            const accentColor = showColorMap.get(show.id) ?? TOUR_COLORS[0]
             const card = (
               <Link key={show.id} href={`/shows/${show.id}`} style={{ textDecoration: 'none', display: 'block' }}>
                 <div
@@ -490,36 +489,45 @@ export default function TourClient({
                   onTouchStart={() => setPressed(show.id)}
                   onTouchEnd={() => setPressed(null)}
                   style={{
-                    backgroundColor: showColorMap.get(show.id) ?? TOUR_COLORS[0],
-                    borderRadius: 18, padding: '20px 16px', minHeight: 80,
-                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 18,
-                    position: 'relative',
-                    opacity: tab === 'historico' ? 0.7 : 1,
-                    transform: pressed === show.id ? 'scale(0.97)' : 'scale(1)',
-                    transition: 'transform 0.15s ease',
+                    display: 'flex', alignItems: 'stretch', gap: 0,
+                    borderRadius: 12, overflow: 'hidden',
+                    background: '#fff', border: '1px solid #EFEFEF',
+                    opacity: tab === 'historico' ? 0.55 : 1,
+                    transform: pressed === show.id ? 'scale(0.98)' : 'scale(1)',
+                    transition: 'transform 0.12s ease',
+                    cursor: 'pointer',
                   }}>
+                  {/* Color accent bar */}
+                  <div style={{ width: 4, flexShrink: 0, background: accentColor }} />
+                  {/* Date block */}
                   <div style={{
-                    width: 52, flexShrink: 0, background: 'rgba(255,255,255,0.25)', borderRadius: 10,
-                    padding: '8px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    width: 58, flexShrink: 0, padding: '14px 0',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    borderRight: '1px solid #F0F0F0',
                   }}>
-                    <span style={{ fontSize: 22, fontWeight: 800, color: '#1a1a1a', lineHeight: 1, fontFamily: SYS }}>{formatDay(show.date)}</span>
-                    <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#1a1a1a', opacity: 0.65, marginTop: 2, fontFamily: SYS }}>{formatMonth(show.date)}</span>
+                    <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#BBBBBB', fontFamily: SYS, lineHeight: 1 }}>{formatWeekday(show.date)}</span>
+                    <span style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', lineHeight: 1, fontFamily: SYS, marginTop: 3 }}>{formatDay(show.date)}</span>
+                    <span style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#AAAAAA', fontFamily: SYS, marginTop: 2 }}>{formatMonth(show.date)}</span>
                   </div>
-                  <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    <p style={{ fontSize: 18, fontWeight: 800, color: '#1a1a1a', margin: 0, lineHeight: 1.2, fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{show.venue_name}</p>
-                    <p style={{ fontSize: 13, fontStyle: 'italic', color: '#1a1a1a', opacity: 0.6, margin: '4px 0 0 0', fontFamily: SYS }}>{show.city}</p>
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 0, padding: '14px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <p style={{ fontSize: 15, fontWeight: 700, color: '#1a1a1a', margin: 0, lineHeight: 1.2, fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{show.venue_name}</p>
+                    <p style={{ fontSize: 12, color: '#999', margin: '3px 0 0 0', fontFamily: SYS, fontStyle: 'italic' }}>{show.city}</p>
                   </div>
-                  <span style={{ fontSize: 14, color: '#1a1a1a', opacity: 0.35, position: 'absolute', bottom: 14, right: 16, lineHeight: 1 }}>→</span>
+                  {/* Arrow */}
+                  <div style={{ display: 'flex', alignItems: 'center', paddingRight: 14 }}>
+                    <span style={{ fontSize: 13, color: '#CCCCCC', fontFamily: SYS }}>›</span>
+                  </div>
                 </div>
               </Link>
             )
-            return <>{separator}{card}</>
+            return <>{groupDivider}{card}</>
           }
 
-          // Travel day card — neutral grey, secondary visual weight
+          // Travel day — smaller, grey, subordinate
           const { travel } = item
           const travelCard = (
-            <Link key={travel.id} href={`/travel/${travel.id}`} style={{ textDecoration: 'none' }}>
+            <Link key={travel.id} href={`/travel/${travel.id}`} style={{ textDecoration: 'none', display: 'block' }}>
               <div
                 onMouseDown={() => setPressed(travel.id)}
                 onMouseUp={() => setPressed(null)}
@@ -527,31 +535,39 @@ export default function TourClient({
                 onTouchStart={() => setPressed(travel.id)}
                 onTouchEnd={() => setPressed(null)}
                 style={{
-                  backgroundColor: '#EDEAE4',
-                  borderRadius: 18, padding: '10px 16px', minHeight: 60,
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 18,
-                  position: 'relative',
-                  transform: pressed === travel.id ? 'scale(0.97)' : 'scale(1)',
-                  transition: 'transform 0.15s ease',
+                  display: 'flex', alignItems: 'stretch',
+                  borderRadius: 10, overflow: 'hidden',
+                  background: '#FAFAFA', border: '1px solid #F0F0F0',
+                  transform: pressed === travel.id ? 'scale(0.98)' : 'scale(1)',
+                  transition: 'transform 0.12s ease',
+                  cursor: 'pointer',
                 }}>
+                {/* No accent — just neutral placeholder */}
+                <div style={{ width: 4, flexShrink: 0, background: '#E8E8E8' }} />
+                {/* Date block */}
                 <div style={{
-                  width: 52, flexShrink: 0, background: 'rgba(0,0,0,0.06)', borderRadius: 10,
-                  padding: '6px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  width: 58, flexShrink: 0, padding: '10px 0',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  borderRight: '1px solid #EEEEEE',
                 }}>
-                  <span style={{ fontSize: 22, fontWeight: 800, color: '#6B6560', lineHeight: 1, fontFamily: SYS }}>{formatDay(travel.date)}</span>
-                  <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6B6560', marginTop: 2, fontFamily: SYS }}>{formatMonth(travel.date)}</span>
+                  <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#CCCCCC', fontFamily: SYS, lineHeight: 1 }}>{formatWeekday(travel.date)}</span>
+                  <span style={{ fontSize: 20, fontWeight: 700, color: '#BBBBBB', lineHeight: 1, fontFamily: SYS, marginTop: 3 }}>{formatDay(travel.date)}</span>
+                  <span style={{ fontSize: 9, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#CCCCCC', fontFamily: SYS, marginTop: 2 }}>{formatMonth(travel.date)}</span>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 15, fontWeight: 600, fontStyle: 'italic', color: '#6B6560', margin: 0, lineHeight: 1.2, fontFamily: SYS }}>Travel Day</p>
+                {/* Info */}
+                <div style={{ flex: 1, minWidth: 0, padding: '10px 14px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: '#AAAAAA', margin: 0, fontFamily: SYS, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Viaje</p>
                   {travel.destination && (
-                    <p style={{ fontSize: 13, color: '#6B6560', margin: '3px 0 0 0', fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{travel.destination}</p>
+                    <p style={{ fontSize: 12, color: '#BBBBBB', margin: '2px 0 0 0', fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{travel.destination}</p>
                   )}
                 </div>
-                <span style={{ fontSize: 14, color: '#6B6560', opacity: 0.5, position: 'absolute', bottom: 10, right: 16, lineHeight: 1 }}>→</span>
+                <div style={{ display: 'flex', alignItems: 'center', paddingRight: 14 }}>
+                  <span style={{ fontSize: 13, color: '#DDDDDD', fontFamily: SYS }}>›</span>
+                </div>
               </div>
             </Link>
           )
-          return separator ? <>{separator}{travelCard}</> : travelCard
+          return groupDivider ? <>{groupDivider}{travelCard}</> : travelCard
         })}
 
       </div>
