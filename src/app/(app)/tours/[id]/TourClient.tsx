@@ -548,7 +548,7 @@ export default function TourClient({
               </div>
             </Link>
           )
-          return travelCard
+          return separator ? <>{separator}{travelCard}</> : travelCard
         })}
 
       </div>
