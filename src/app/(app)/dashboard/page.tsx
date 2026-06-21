@@ -10,7 +10,7 @@ export default async function DashboardPage() {
 
   const [{ data: memberships }, { data: profile }] = await Promise.all([
     supabase.from('tour_members').select('tour_id, role').eq('user_id', user.id),
-    supabase.from('profiles').select('role').eq('id', user.id).single(),
+    supabase.from('profiles').select('role, full_name').eq('id', user.id).single(),
   ])
 
   const tourIds = memberships?.map(m => m.tour_id) ?? []
@@ -25,6 +25,7 @@ export default async function DashboardPage() {
         nextShow={null}
         isAdmin={true}
         adminTourIds={[]}
+        userName={profile?.full_name ?? null}
       />
     )
   }
@@ -63,6 +64,7 @@ export default async function DashboardPage() {
     <DashboardClient
       tours={tourList}
       tourStats={tourStats}
+      userName={profile?.full_name ?? null}
       nextShow={nextShow ? {
         id: nextShow.id,
         venue_name: nextShow.venue_name,

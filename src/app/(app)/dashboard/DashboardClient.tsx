@@ -179,12 +179,14 @@ export default function DashboardClient({
   nextShow,
   isAdmin,
   adminTourIds,
+  userName,
 }: {
   tours: Tour[]
   tourStats: Record<string, { count: number; nextDate: string | null }>
   nextShow: { id: string; venue_name: string; city: string; date: string; color: string | null; tourName: string | null; show_time: string | null; show_duration: number | null } | null
   isAdmin: boolean
   adminTourIds: string[]
+  userName: string | null
 }) {
   const router = useRouter()
   const supabase = createClient()
@@ -399,9 +401,14 @@ export default function DashboardClient({
 
       {/* Header — solo cuando hay giras */}
       {tours.length > 0 && (
-        <div style={{ padding: '48px 20px 28px' }}>
+        <div style={{ padding: '48px 20px 20px' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="Tour Pilot" height={28} style={{ display: 'block', maxWidth: 140 }} />
+          <img src="/logo.svg" alt="Tour Pilot" height={28} style={{ display: 'block', maxWidth: 140, marginBottom: 16 }} />
+          {userName && (
+            <p style={{ fontSize: 28, fontWeight: 800, color: '#1a1a1a', margin: 0, fontFamily: SYS, lineHeight: 1.2 }}>
+              ¡Hola, {userName.split(' ')[0]}!
+            </p>
+          )}
         </div>
       )}
 
@@ -439,43 +446,54 @@ export default function DashboardClient({
                       {nextShow.tourName}
                     </p>
                   )}
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                    {countdown?.live ? (
-                      <span style={{
-                        fontSize: 22, fontWeight: 800, color: '#DC412C', fontFamily: SYS,
-                        animation: 'pulse 1.2s ease-in-out infinite',
-                      }}>EN DIRECTO</span>
-                    ) : countdown ? (() => {
-                      const urgent = countdown.hours === 0 && countdown.minutes < 60
-                      const col = urgent ? '#DC412C' : '#1a1a1a'
-                      const pad = (n: number) => String(n).padStart(2, '0')
-                      return (
-                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4 }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <span style={{ fontSize: 32, fontWeight: 800, color: col, lineHeight: 1, fontFamily: SYS }}>{pad(countdown.hours)}</span>
-                            <span style={{ fontSize: 10, color: 'rgba(26,26,26,0.5)', fontFamily: SYS, marginTop: 2 }}>h</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    {/* Días/countdown box */}
+                    <div style={{ background: 'rgba(255,255,255,0.35)', borderRadius: 14, padding: '10px 14px', display: 'inline-flex', alignItems: 'center' }}>
+                      {countdown?.live ? (
+                        <span style={{
+                          fontSize: 18, fontWeight: 800, color: '#DC412C', fontFamily: SYS,
+                          animation: 'pulse 1.2s ease-in-out infinite',
+                        }}>EN DIRECTO</span>
+                      ) : countdown ? (() => {
+                        const urgent = countdown.hours === 0 && countdown.minutes < 60
+                        const col = urgent ? '#DC412C' : '#1a1a1a'
+                        const pad = (n: number) => String(n).padStart(2, '0')
+                        return (
+                          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3 }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                              <span style={{ fontSize: 26, fontWeight: 800, color: col, lineHeight: 1, fontFamily: SYS }}>{pad(countdown.hours)}</span>
+                              <span style={{ fontSize: 9, color: 'rgba(26,26,26,0.5)', fontFamily: SYS, marginTop: 1 }}>h</span>
+                            </div>
+                            <span style={{ fontSize: 22, fontWeight: 800, color: col, lineHeight: 1, fontFamily: SYS, marginBottom: 3 }}>:</span>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                              <span style={{ fontSize: 26, fontWeight: 800, color: col, lineHeight: 1, fontFamily: SYS }}>{pad(countdown.minutes)}</span>
+                              <span style={{ fontSize: 9, color: 'rgba(26,26,26,0.5)', fontFamily: SYS, marginTop: 1 }}>min</span>
+                            </div>
+                            <span style={{ fontSize: 22, fontWeight: 800, color: col, lineHeight: 1, fontFamily: SYS, marginBottom: 3 }}>:</span>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                              <span style={{ fontSize: 26, fontWeight: 800, color: col, lineHeight: 1, fontFamily: SYS }}>{pad(countdown.seconds)}</span>
+                              <span style={{ fontSize: 9, color: 'rgba(26,26,26,0.5)', fontFamily: SYS, marginTop: 1 }}>seg</span>
+                            </div>
                           </div>
-                          <span style={{ fontSize: 28, fontWeight: 800, color: col, lineHeight: 1, fontFamily: SYS, marginBottom: 4 }}>:</span>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <span style={{ fontSize: 32, fontWeight: 800, color: col, lineHeight: 1, fontFamily: SYS }}>{pad(countdown.minutes)}</span>
-                            <span style={{ fontSize: 10, color: 'rgba(26,26,26,0.5)', fontFamily: SYS, marginTop: 2 }}>min</span>
-                          </div>
-                          <span style={{ fontSize: 28, fontWeight: 800, color: col, lineHeight: 1, fontFamily: SYS, marginBottom: 4 }}>:</span>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <span style={{ fontSize: 32, fontWeight: 800, color: col, lineHeight: 1, fontFamily: SYS }}>{pad(countdown.seconds)}</span>
-                            <span style={{ fontSize: 10, color: 'rgba(26,26,26,0.5)', fontFamily: SYS, marginTop: 2 }}>seg</span>
-                          </div>
-                        </div>
-                      )
-                    })() : days === 0 ? (
-                      <span style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', fontFamily: SYS }}>HOY</span>
-                    ) : days === 1 ? (
-                      <span style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', fontFamily: SYS }}>MAÑANA</span>
-                    ) : (
-                      <>
-                        <span style={{ fontSize: 36, fontWeight: 800, color: '#1a1a1a', lineHeight: 1, fontFamily: SYS }}>{days}</span>
-                        <span style={{ fontSize: 13, color: 'rgba(26,26,26,0.6)', fontFamily: SYS }}>días</span>
-                      </>
+                        )
+                      })() : days === 0 ? (
+                        <span style={{ fontSize: 18, fontWeight: 800, color: '#1a1a1a', fontFamily: SYS }}>HOY</span>
+                      ) : days === 1 ? (
+                        <span style={{ fontSize: 18, fontWeight: 800, color: '#1a1a1a', fontFamily: SYS }}>MAÑANA</span>
+                      ) : (
+                        <span style={{ fontSize: 18, fontWeight: 800, color: '#1a1a1a', fontFamily: SYS }}>
+                          Quedan {days} días
+                        </span>
+                      )}
+                    </div>
+                    {/* Hora del show */}
+                    {nextShow.show_time && !countdown?.live && (
+                      <div style={{ background: 'rgba(255,255,255,0.35)', borderRadius: 14, padding: '10px 14px', display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(26,26,26,0.5)', fontFamily: SYS, marginBottom: 2 }}>SHOW</span>
+                        <span style={{ fontSize: 18, fontWeight: 800, color: '#1a1a1a', fontFamily: SYS, lineHeight: 1 }}>
+                          {nextShow.show_time.slice(0, 5)}
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>
