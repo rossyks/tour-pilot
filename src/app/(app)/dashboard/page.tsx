@@ -31,7 +31,7 @@ export default async function DashboardPage() {
 
   const [{ data: tours }, { data: allShows }] = await Promise.all([
     supabase.from('tours').select('*').in('id', tourIds).order('created_at', { ascending: true }),
-    supabase.from('shows').select('id, tour_id, date, venue_name, city, color').in('tour_id', tourIds).order('date', { ascending: true }),
+    supabase.from('shows').select('id, tour_id, date, venue_name, city, color, show_time, show_duration').in('tour_id', tourIds).order('date', { ascending: true }),
   ])
 
   const today = new Date().toISOString().split('T')[0]
@@ -70,6 +70,8 @@ export default async function DashboardPage() {
         date: nextShow.date,
         color: nextShowColor,
         tourName: nextShowTour?.name ?? null,
+        show_time: nextShow.show_time ?? null,
+        show_duration: nextShow.show_duration ?? null,
       } : null}
       isAdmin={true}
       adminTourIds={adminTourIds}
