@@ -57,7 +57,10 @@ export default function ProfileClient({
   const router = useRouter()
   const supabase = createClient()
   const fileRef = useRef<HTMLInputElement>(null)
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(profile?.avatar_url ?? null)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(
+    profile?.avatar_url ? `${profile.avatar_url}?t=${Date.now()}` : null
+  )
+  const [avatarError, setAvatarError] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [resetMsg, setResetMsg] = useState<string | null>(null)
 
@@ -74,15 +77,21 @@ export default function ProfileClient({
     const file = e.target.files?.[0]
     if (!file || !profile?.id) return
     setUploading(true)
+    setAvatarError(false)
     const ext = file.name.split('.').pop() ?? 'jpg'
     const filePath = `${profile.id}.${ext}`
     const { error: uploadError } = await supabase.storage
       .from('avatars')
       .upload(filePath, file, { upsert: true, contentType: file.type })
-    if (uploadError) { setUploading(false); return }
+    if (uploadError) {
+      console.error('Avatar upload error:', uploadError)
+      setUploading(false)
+      return
+    }
     const { data } = supabase.storage.from('avatars').getPublicUrl(filePath)
     await supabase.from('profiles').update({ avatar_url: data.publicUrl }).eq('id', profile.id)
     setAvatarUrl(`${data.publicUrl}?t=${Date.now()}`)
+    setAvatarError(false)
     setUploading(false)
   }
 
@@ -99,7 +108,7 @@ export default function ProfileClient({
   }
 
   return (
-    <div className="tp-page" style={{ minHeight: '100vh', background: '#F5F4F2', maxWidth: 390, margin: '0 auto', paddingBottom: 100, fontFamily: SYS }}>
+    <div className="tp-page" style={{ minHeight: '100vh', background: '#fff', maxWidth: 390, margin: '0 auto', paddingBottom: 100, fontFamily: SYS }}>
 
       {/* ── Header ── */}
       <div style={{ padding: '20px 16px 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -114,9 +123,9 @@ export default function ProfileClient({
             background: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center',
             opacity: uploading ? 0.6 : 1, flexShrink: 0,
           }}>
-            {avatarUrl ? (
+            {avatarUrl && !avatarError ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarUrl} alt={name ?? email} style={{ width: 80, height: 80, objectFit: 'cover' }} />
+              <img src={avatarUrl} alt={name ?? email} style={{ width: 80, height: 80, objectFit: 'cover' }} onError={() => setAvatarError(true)} />
             ) : (
               <span style={{ fontSize: 28, fontWeight: 800, color: '#fff', fontFamily: SYS }}>{initials}</span>
             )}
