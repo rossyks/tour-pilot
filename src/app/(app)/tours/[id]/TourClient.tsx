@@ -380,24 +380,32 @@ export default function TourClient({
         )}
       </div>
 
-      {/* Tabs */}
+      {/* Tabs + add button */}
       {allItems.length > 0 && (
         <div style={{ padding: '0 20px', marginBottom: 16 }}>
-          <div style={{ display: 'flex', gap: 24 }}>
-            {(['proximos', 'historico'] as const).map(t => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                style={{
-                  background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 8px 0',
-                  fontSize: 14, fontFamily: SYS,
-                  fontWeight: tab === t ? 700 : 400,
-                  color: tab === t ? '#1a1a1a' : '#999',
-                  borderBottom: tab === t ? '2px solid #1a1a1a' : '2px solid transparent',
-                }}>
-                {t === 'proximos' ? 'Próximos' : 'Histórico'}
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 24, flex: 1 }}>
+              {(['proximos', 'historico'] as const).map(t => (
+                <button
+                  key={t}
+                  onClick={() => setTab(t)}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 8px 0',
+                    fontSize: 14, fontFamily: SYS,
+                    fontWeight: tab === t ? 700 : 400,
+                    color: tab === t ? '#1a1a1a' : '#999',
+                    borderBottom: tab === t ? '2px solid #1a1a1a' : '2px solid transparent',
+                  }}>
+                  {t === 'proximos' ? 'Próximos' : 'Histórico'}
+                </button>
+              ))}
+            </div>
+            {isAdmin && tab === 'proximos' && (
+              <button onClick={() => setSheetOpen(true)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 8px 0', fontSize: 22, lineHeight: 1, color: '#1a1a1a', fontFamily: SYS, fontWeight: 300 }}>
+                +
               </button>
-            ))}
+            )}
           </div>
           <div style={{ height: '0.5px', background: '#F0F0F0' }} />
         </div>
@@ -449,7 +457,12 @@ export default function TourClient({
           </div>
         )}
 
-        {items.map(item => {
+        {items.map((item, idx) => {
+          // Separator before each show that isn't the first item
+          const separator = item._type === 'show' && idx > 0 ? (
+            <div key={`sep-${idx}`} style={{ width: 120, height: 2, background: '#1a1a1a', borderRadius: 1, margin: '6px 0' }} />
+          ) : null
+
           if (item._type === 'show') {
             const { show, showIndex } = item
             const card = (
@@ -484,11 +497,11 @@ export default function TourClient({
                 </div>
               </Link>
             )
-            return card
+            return <>{separator}{card}</>
           }
 
-          // Travel day card
-          const { travel, showColor } = item
+          // Travel day card — neutral grey, secondary visual weight
+          const { travel } = item
           const travelCard = (
             <Link key={travel.id} href={`/travel/${travel.id}`} style={{ textDecoration: 'none' }}>
               <div
@@ -498,7 +511,7 @@ export default function TourClient({
                 onTouchStart={() => setPressed(travel.id)}
                 onTouchEnd={() => setPressed(null)}
                 style={{
-                  backgroundColor: showColor, opacity: 0.6,
+                  backgroundColor: '#EDEAE4',
                   borderRadius: 18, padding: '10px 16px', minHeight: 60,
                   cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 18,
                   position: 'relative',
@@ -506,37 +519,25 @@ export default function TourClient({
                   transition: 'transform 0.15s ease',
                 }}>
                 <div style={{
-                  width: 52, flexShrink: 0, background: 'rgba(255,255,255,0.25)', borderRadius: 10,
+                  width: 52, flexShrink: 0, background: 'rgba(0,0,0,0.06)', borderRadius: 10,
                   padding: '6px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <span style={{ fontSize: 22, fontWeight: 800, color: '#1a1a1a', lineHeight: 1, fontFamily: SYS }}>{formatDay(travel.date)}</span>
-                  <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#1a1a1a', opacity: 0.65, marginTop: 2, fontFamily: SYS }}>{formatMonth(travel.date)}</span>
+                  <span style={{ fontSize: 22, fontWeight: 800, color: '#6B6560', lineHeight: 1, fontFamily: SYS }}>{formatDay(travel.date)}</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6B6560', marginTop: 2, fontFamily: SYS }}>{formatMonth(travel.date)}</span>
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 16, fontWeight: 700, fontStyle: 'italic', color: '#1a1a1a', margin: 0, lineHeight: 1.2, fontFamily: SYS }}>Travel Day</p>
+                  <p style={{ fontSize: 15, fontWeight: 600, fontStyle: 'italic', color: '#6B6560', margin: 0, lineHeight: 1.2, fontFamily: SYS }}>Travel Day</p>
                   {travel.destination && (
-                    <p style={{ fontSize: 13, color: '#1a1a1a', opacity: 0.65, margin: '3px 0 0 0', fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{travel.destination}</p>
+                    <p style={{ fontSize: 13, color: '#6B6560', margin: '3px 0 0 0', fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{travel.destination}</p>
                   )}
                 </div>
-                <span style={{ fontSize: 14, color: '#1a1a1a', opacity: 0.35, position: 'absolute', bottom: 10, right: 16, lineHeight: 1 }}>→</span>
+                <span style={{ fontSize: 14, color: '#6B6560', opacity: 0.5, position: 'absolute', bottom: 10, right: 16, lineHeight: 1 }}>→</span>
               </div>
             </Link>
           )
           return travelCard
         })}
 
-        {/* Add fecha — admin only, only in Próximos tab */}
-        {isAdmin && tab === 'proximos' && allItems.length > 0 && (
-          <button onClick={() => setSheetOpen(true)} style={{
-            width: '100%', height: 64, background: 'transparent',
-            border: '1.5px dashed #CCCCCC', borderRadius: 18,
-            fontSize: 15, fontWeight: 600, color: '#999',
-            cursor: 'pointer', fontFamily: SYS,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            + Añadir fecha
-          </button>
-        )}
       </div>
 
       {/* Team sheet */}
