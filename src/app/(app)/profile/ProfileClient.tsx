@@ -62,6 +62,7 @@ export default function ProfileClient({
   )
   const [avatarError, setAvatarError] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
   const [resetMsg, setResetMsg] = useState<string | null>(null)
 
   const name = profile?.full_name ?? null
@@ -78,13 +79,15 @@ export default function ProfileClient({
     if (!file || !profile?.id) return
     setUploading(true)
     setAvatarError(false)
+    setUploadError(null)
     const ext = file.name.split('.').pop() ?? 'jpg'
     const filePath = `${profile.id}.${ext}`
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadErr } = await supabase.storage
       .from('avatars')
       .upload(filePath, file, { upsert: true, contentType: file.type })
-    if (uploadError) {
-      console.error('Avatar upload error:', uploadError)
+    if (uploadErr) {
+      console.error('Avatar upload error:', uploadErr)
+      setUploadError(uploadErr.message)
       setUploading(false)
       return
     }
@@ -113,7 +116,7 @@ export default function ProfileClient({
       {/* ── Header ── */}
       <div style={{ padding: '20px 16px 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.svg" alt="Tour Pilot" style={{ display: 'block', alignSelf: 'flex-start', height: 22, maxWidth: 110, marginBottom: 20 }} />
+        <img src="/logo.svg" alt="Tour Pilot" style={{ display: 'block', alignSelf: 'flex-start', height: 28, maxWidth: 140, marginBottom: 20 }} />
 
         {/* Avatar */}
         <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatarChange} />
@@ -138,6 +141,9 @@ export default function ProfileClient({
           }}>📷</div>
         </div>
 
+        {uploadError && (
+          <p style={{ fontSize: 12, color: '#DC412C', margin: '8px 0 0', fontFamily: SYS, textAlign: 'center' }}>{uploadError}</p>
+        )}
         {/* Name */}
         <p style={{ fontSize: 22, fontWeight: 800, color: '#1a1a1a', margin: '12px 0 0', fontFamily: SYS, textAlign: 'center' }}>
           {name ?? email}
