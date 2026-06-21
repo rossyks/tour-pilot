@@ -592,7 +592,9 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
   const [pickingCheck, setPickingCheck] = useState(false)
   const [infoSheet, setInfoSheet] = useState<'show' | 'sc' | 'aforo' | 'pantalla' | null>(null)
   const [showForm, setShowForm] = useState({ time: '', duration: '' })
+  const [showFormError, setShowFormError] = useState<string | null>(null)
   const [scForm, setScForm] = useState({ time: '', duration: '' })
+  const [scFormError, setScFormError] = useState<string | null>(null)
   const [aforoForm, setAforoForm] = useState({ capacity: '' })
   const [pantallaForm, setPantallaForm] = useState({ has_screen: false, resolution: '' })
   const [addingLink, setAddingLink] = useState(false)
@@ -1659,7 +1661,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
       />
 
       {/* ── Info bar sheets ── */}
-      <BottomSheet open={infoSheet === 'show'} onClose={() => setInfoSheet(null)}>
+      <BottomSheet open={infoSheet === 'show'} onClose={() => { setInfoSheet(null); setShowFormError(null) }}>
         <p style={{ fontWeight: 700, fontSize: 16, margin: '0 0 18px 0', fontFamily: SYS }}>Show</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div>
@@ -1668,19 +1670,31 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
           </div>
           <div>
             <p style={{ fontSize: 11, color: '#999', margin: '0 0 4px 0', fontFamily: SYS, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Duración (minutos)</p>
-            <input type="number" min="0" step="1" value={showForm.duration} onChange={e => setShowForm(f => ({ ...f, duration: e.target.value }))} placeholder="—" style={inputStyle} />
+            <input
+              type="number" inputMode="numeric" pattern="[0-9]*"
+              min="0" max="300" placeholder="60"
+              value={showForm.duration}
+              onChange={e => { setShowForm(f => ({ ...f, duration: e.target.value })); setShowFormError(null) }}
+              style={inputStyle}
+            />
+            {showFormError && <p style={{ fontSize: 12, color: '#DC412C', margin: '4px 0 0 0', fontFamily: SYS }}>{showFormError}</p>}
           </div>
           <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-            <button onClick={() => setInfoSheet(null)} style={cancelFlexStyle}>Cancelar</button>
-            <button onClick={async () => { await update('show_time', showForm.time || null); await update('show_duration', parseInt(showForm.duration) || null); setInfoSheet(null) }}
-              style={{ flex: 1, height: 52, background: '#1a1a1a', border: 'none', borderRadius: 14, fontSize: 16, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: SYS }}>
+            <button onClick={() => { setInfoSheet(null); setShowFormError(null) }} style={cancelFlexStyle}>Cancelar</button>
+            <button onClick={async () => {
+              const dur = showForm.duration.trim()
+              if (dur !== '' && (!/^\d+$/.test(dur) || parseInt(dur) < 0)) { setShowFormError('Introduce un número válido'); return }
+              await update('show_time', showForm.time || null)
+              await update('show_duration', dur ? parseInt(dur) : null)
+              setInfoSheet(null); setShowFormError(null)
+            }} style={{ flex: 1, height: 52, background: '#1a1a1a', border: 'none', borderRadius: 14, fontSize: 16, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: SYS }}>
               Guardar
             </button>
           </div>
         </div>
       </BottomSheet>
 
-      <BottomSheet open={infoSheet === 'sc'} onClose={() => setInfoSheet(null)}>
+      <BottomSheet open={infoSheet === 'sc'} onClose={() => { setInfoSheet(null); setScFormError(null) }}>
         <p style={{ fontWeight: 700, fontSize: 16, margin: '0 0 18px 0', fontFamily: SYS }}>{checkType === 'linecheck' ? 'Linecheck' : 'Soundcheck'}</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div>
@@ -1689,12 +1703,24 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
           </div>
           <div>
             <p style={{ fontSize: 11, color: '#999', margin: '0 0 4px 0', fontFamily: SYS, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Duración (minutos)</p>
-            <input type="number" min="0" step="1" value={scForm.duration} onChange={e => setScForm(f => ({ ...f, duration: e.target.value }))} placeholder="—" style={inputStyle} />
+            <input
+              type="number" inputMode="numeric" pattern="[0-9]*"
+              min="0" max="180" placeholder="30"
+              value={scForm.duration}
+              onChange={e => { setScForm(f => ({ ...f, duration: e.target.value })); setScFormError(null) }}
+              style={inputStyle}
+            />
+            {scFormError && <p style={{ fontSize: 12, color: '#DC412C', margin: '4px 0 0 0', fontFamily: SYS }}>{scFormError}</p>}
           </div>
           <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-            <button onClick={() => setInfoSheet(null)} style={cancelFlexStyle}>Cancelar</button>
-            <button onClick={async () => { await update('soundcheck_time', scForm.time || null); await update('soundcheck_duration', parseInt(scForm.duration) || null); setInfoSheet(null) }}
-              style={{ flex: 1, height: 52, background: '#1a1a1a', border: 'none', borderRadius: 14, fontSize: 16, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: SYS }}>
+            <button onClick={() => { setInfoSheet(null); setScFormError(null) }} style={cancelFlexStyle}>Cancelar</button>
+            <button onClick={async () => {
+              const dur = scForm.duration.trim()
+              if (dur !== '' && (!/^\d+$/.test(dur) || parseInt(dur) < 0)) { setScFormError('Introduce un número válido'); return }
+              await update('soundcheck_time', scForm.time || null)
+              await update('soundcheck_duration', dur ? parseInt(dur) : null)
+              setInfoSheet(null); setScFormError(null)
+            }} style={{ flex: 1, height: 52, background: '#1a1a1a', border: 'none', borderRadius: 14, fontSize: 16, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: SYS }}>
               Guardar
             </button>
           </div>
