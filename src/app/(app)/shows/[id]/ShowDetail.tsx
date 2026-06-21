@@ -1009,9 +1009,9 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
     doc.rect(0, 0, W, 2, 'F')
 
     // Tour Pilot logo (left)
-    const tpLogo = await imgToBase64('/logo-print.png')
+    const tpLogo = await imgToBase64(window.location.origin + '/logo-print.png')
     if (tpLogo) {
-      doc.addImage(tpLogo, 'PNG', M, 6, 36, 12)
+      doc.addImage(tpLogo, 'PNG', M, 6, 36, 12.5)
     }
 
     // Band logo (right) if available
@@ -1043,24 +1043,24 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
 
     // ── Bloque 1 — Info técnica ──────────────────────────────────────────────────
     doc.setFillColor(245, 245, 245)
-    doc.roundedRect(M, y, W - M * 2, 28, 3, 3, 'F')
+    doc.roundedRect(M, y, W - M * 2, 36, 3, 3, 'F')
 
     const colW = (W - M * 2) / 3
     const infoCols = [
       { label: 'SHOW', value: t5(data.show_time) || '—', sub: data.show_duration ? `${data.show_duration} min` : '' },
-      { label: checkType === 'linecheck' ? 'LC' : 'SC', value: t5(data.soundcheck_time) || '—', sub: data.soundcheck_duration ? `${data.soundcheck_duration} min` : '' },
+      { label: checkType === 'linecheck' ? 'LINECHECK' : 'SOUNDCHECK', value: t5(data.soundcheck_time) || '—', sub: data.soundcheck_duration ? `${data.soundcheck_duration} min` : '' },
       { label: 'PANTALLA', value: data.has_screen ? 'SÍ' : 'NO', sub: data.has_screen && data.screen_resolution ? data.screen_resolution : '' },
     ]
     infoCols.forEach((col, i) => {
       const cx = M + i * colW + 8
       doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(153, 153, 153)
-      doc.text(col.label, cx, y + 9)
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(26, 26, 26)
-      doc.text(col.value, cx, y + 19)
-      if (col.sub) { doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(153, 153, 153); doc.text(col.sub, cx, y + 25) }
-      if (i < 2) { doc.setDrawColor(232, 232, 232); doc.setLineWidth(0.3); doc.line(M + (i + 1) * colW, y + 4, M + (i + 1) * colW, y + 25) }
+      doc.text(col.label, cx, y + 10)
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(16); doc.setTextColor(26, 26, 26)
+      doc.text(col.value, cx, y + 23)
+      if (col.sub) { doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(153, 153, 153); doc.text(col.sub, cx, y + 30) }
+      if (i < 2) { doc.setDrawColor(232, 232, 232); doc.setLineWidth(0.3); doc.line(M + (i + 1) * colW, y + 4, M + (i + 1) * colW, y + 33) }
     })
-    y += 38
+    y += 46
 
     // ── Bloque 2 — Day Sheet ──────────────────────────────────────────────────
     if (schedule.length > 0) {
