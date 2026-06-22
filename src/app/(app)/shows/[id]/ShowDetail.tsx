@@ -665,7 +665,7 @@ export default function ShowDetail({ show, isAdmin, isPro, tourId, userId, tourM
   const [sheetContacts, setSheetContacts] = useState(false)
   const [sheetAddress, setSheetAddress] = useState(false)
   const [mountedPortal, setMountedPortal] = useState(false)
-  const [proUpgradeFeature, setProUpgradeFeature] = useState<'visibility' | 'notify' | null>(null)
+  const [proUpgradeFeature, setProUpgradeFeature] = useState<'visibility' | 'notify' | 'travel' | null>(null)
   const [sheetNotify, setSheetNotify] = useState(false)
   const [notifyMsg, setNotifyMsg] = useState('')
   const [notifySubject, setNotifySubject] = useState('')
@@ -1343,20 +1343,22 @@ export default function ShowDetail({ show, isAdmin, isPro, tourId, userId, tourM
           </div>
         </div>
 
-        {/* Travel day buttons — admin + pro only */}
-        {isAdmin && isPro && (
+        {/* Travel day buttons — admin only, gated by pro */}
+        {isAdmin && (
           <div style={{ display: 'flex', gap: 20, marginTop: 10, paddingLeft: 2 }}>
             <button
-              onClick={() => handleTravelDay('before')}
-              disabled={creatingTravel === 'before'}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12, color: '#999', fontFamily: SYS, opacity: creatingTravel === 'before' ? 0.5 : 1 }}>
+              onClick={() => isPro ? handleTravelDay('before') : setProUpgradeFeature('travel')}
+              disabled={isPro && creatingTravel === 'before'}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12, color: '#999', fontFamily: SYS, opacity: isPro && creatingTravel === 'before' ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: 4 }}>
               {travelDayBefore ? 'Ver Travel Day antes' : '+ Travel Day antes'}
+              {!isPro && <span style={{ fontSize: 9, fontWeight: 700, color: '#fff', background: '#1a1a1a', borderRadius: 3, padding: '1px 4px' }}>PRO</span>}
             </button>
             <button
-              onClick={() => handleTravelDay('after')}
-              disabled={creatingTravel === 'after'}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12, color: '#999', fontFamily: SYS, opacity: creatingTravel === 'after' ? 0.5 : 1 }}>
+              onClick={() => isPro ? handleTravelDay('after') : setProUpgradeFeature('travel')}
+              disabled={isPro && creatingTravel === 'after'}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12, color: '#999', fontFamily: SYS, opacity: isPro && creatingTravel === 'after' ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: 4 }}>
               {travelDayAfter ? 'Ver Travel Day después' : '+ Travel Day después'}
+              {!isPro && <span style={{ fontSize: 9, fontWeight: 700, color: '#fff', background: '#1a1a1a', borderRadius: 3, padding: '1px 4px' }}>PRO</span>}
             </button>
           </div>
         )}
@@ -2348,14 +2350,16 @@ export default function ShowDetail({ show, isAdmin, isPro, tourId, userId, tourM
               style={{ position: 'absolute', top: 18, right: 18, background: 'none', border: 'none', fontSize: 20, color: '#999', cursor: 'pointer', lineHeight: 1, padding: 4 }}>✕</button>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 44, marginBottom: 14 }}>
-                {proUpgradeFeature === 'notify' ? '🔔' : '👁'}
+                {proUpgradeFeature === 'notify' ? '🔔' : proUpgradeFeature === 'travel' ? '🚌' : '👁'}
               </div>
               <p style={{ fontSize: 20, fontWeight: 800, color: '#1a1a1a', margin: '0 0 10px', fontFamily: SYS }}>
-                {proUpgradeFeature === 'notify' ? 'Notificaciones al equipo' : 'Visibilidad por persona'}
+                {proUpgradeFeature === 'notify' ? 'Notificaciones al equipo' : proUpgradeFeature === 'travel' ? 'Travel Days' : 'Visibilidad por persona'}
               </p>
               <p style={{ fontSize: 14, color: '#666', margin: '0 0 28px', fontFamily: SYS, lineHeight: 1.6 }}>
                 {proUpgradeFeature === 'notify'
                   ? 'Envía mensajes directamente al email de cada miembro del equipo desde la app. Disponible en el plan Pro.'
+                  : proUpgradeFeature === 'travel'
+                  ? 'Añade días de viaje antes y después de cada show con su propio horario y documentos. Disponible en el plan Pro.'
                   : 'Controla qué miembros del equipo pueden ver cada billete o tramo del horario. Disponible en el plan Pro.'}
               </p>
               <button style={{ width: '100%', height: 52, background: '#1a1a1a', border: 'none', borderRadius: 12, fontSize: 16, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: SYS, marginBottom: 10 }}>
