@@ -949,7 +949,7 @@ export default function TourClient({
                 <button style={{ width: '100%', height: 52, background: '#1a1a1a', border: 'none', borderRadius: 12, fontSize: 16, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: SYS, marginBottom: 10 }}>
                   Actualizar a Pro
                 </button>
-                <button onClick={() => setUpgradeSheetOpen(false)}
+                <button onClick={() => { setUpgradeSheetOpen(false); router.push('/pro') }}
                   style={{ width: '100%', height: 48, background: '#F5F5F5', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 500, color: '#666', cursor: 'pointer', fontFamily: SYS }}>
                   Más información
                 </button>

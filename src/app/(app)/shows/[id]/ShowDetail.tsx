@@ -2369,7 +2369,7 @@ export default function ShowDetail({ show, isAdmin, isPro, tourId, userId, tourM
               <button style={{ width: '100%', height: 52, background: '#1a1a1a', border: 'none', borderRadius: 12, fontSize: 16, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: SYS, marginBottom: 10 }}>
                 Desbloquear Pro
               </button>
-              <button onClick={() => setProUpgradeFeature(null)}
+              <button onClick={() => { setProUpgradeFeature(null); router.push('/pro') }}
                 style={{ width: '100%', height: 44, background: '#F5F5F5', border: 'none', borderRadius: 12, fontSize: 14, fontWeight: 500, color: '#666', cursor: 'pointer', fontFamily: SYS }}>
                 Más información
               </button>
