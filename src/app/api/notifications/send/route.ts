@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 function fmtDate(iso: string) {
   return new Date(iso + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).replace('.', '')
 }
@@ -98,6 +96,7 @@ export async function POST(req: NextRequest) {
 </body>
 </html>`
 
+      const resend = new Resend(process.env.RESEND_API_KEY)
       const { error } = await resend.emails.send({
         from: 'Tour Pilot <no-reply@tourpilot.live>',
         to: email,
