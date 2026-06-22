@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Tour, TOUR_COLORS } from '@/lib/types'
 import { useScrollLock } from '@/lib/useScrollLock'
+import CalendarView from './CalendarView'
 
 const SYS = "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif"
 
@@ -180,6 +181,8 @@ export default function DashboardClient({
   isAdmin,
   adminTourIds,
   userName,
+  allShows,
+  allTravelDays,
 }: {
   tours: Tour[]
   tourStats: Record<string, { count: number; nextDate: string | null }>
@@ -187,10 +190,22 @@ export default function DashboardClient({
   isAdmin: boolean
   adminTourIds: string[]
   userName: string | null
+  allShows: Array<{ id: string; tour_id: string; date: string; venue_name: string; city: string; show_time: string | null }>
+  allTravelDays: Array<{ id: string; show_id: string; date: string; destination: string | null; tour_id: string }>
 }) {
   const router = useRouter()
   const supabase = createClient()
   const [tours, setTours] = useState<Tour[]>(initialTours)
+  const [view, setView] = useState<'list' | 'calendar'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('dashboard-view') as 'list' | 'calendar') ?? 'list'
+    }
+    return 'list'
+  })
+  function switchView(v: 'list' | 'calendar') {
+    setView(v)
+    if (typeof window !== 'undefined') localStorage.setItem('dashboard-view', v)
+  }
   const [tourStats, setTourStats] = useState(initialTourStats)
   const [pressed, setPressed] = useState<string | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
@@ -402,8 +417,24 @@ export default function DashboardClient({
       {/* Header — solo cuando hay giras */}
       {tours.length > 0 && (
         <div style={{ padding: '48px 20px 20px' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="Tour Pilot" height={28} style={{ display: 'block', maxWidth: 140, marginBottom: 16 }} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.svg" alt="Tour Pilot" height={28} style={{ display: 'block', maxWidth: 140 }} />
+            <div style={{ display: 'flex', gap: 4 }}>
+              <button onClick={() => switchView('list')} style={{ background: view === 'list' ? '#F0F0F0' : 'none', border: 'none', cursor: 'pointer', padding: 6, borderRadius: 8, display: 'flex', alignItems: 'center' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={view === 'list' ? '#1a1a1a' : '#CCC'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                  <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+                </svg>
+              </button>
+              <button onClick={() => switchView('calendar')} style={{ background: view === 'calendar' ? '#F0F0F0' : 'none', border: 'none', cursor: 'pointer', padding: 6, borderRadius: 8, display: 'flex', alignItems: 'center' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={view === 'calendar' ? '#1a1a1a' : '#CCC'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                  <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+              </button>
+            </div>
+          </div>
           {userName && (
             <p style={{ fontSize: 28, fontWeight: 800, color: '#1a1a1a', margin: 0, fontFamily: SYS, lineHeight: 1.2 }}>
               ¡Hola, {userName.split(' ')[0]}!
@@ -412,7 +443,11 @@ export default function DashboardClient({
         </div>
       )}
 
-      {tours.length > 0 && (
+      {tours.length > 0 && view === 'calendar' && (
+        <CalendarView tours={tours} shows={allShows} travelDays={allTravelDays} />
+      )}
+
+      {tours.length > 0 && view === 'list' && (
         <div style={{ padding: '0 20px 80px', display: 'flex', flexDirection: 'column', gap: 32 }}>
 
           {/* ── Próximo show ── */}

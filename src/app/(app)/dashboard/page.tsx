@@ -14,7 +14,6 @@ export default async function DashboardPage() {
   ])
 
   const tourIds = memberships?.map(m => m.tour_id) ?? []
-
   const adminTourIds = (memberships ?? []).filter(m => m.role === 'admin' || m.role === 'owner').map(m => m.tour_id)
 
   if (tourIds.length === 0) {
@@ -26,6 +25,8 @@ export default async function DashboardPage() {
         isAdmin={true}
         adminTourIds={[]}
         userName={profile?.full_name ?? null}
+        allShows={[]}
+        allTravelDays={[]}
       />
     )
   }
@@ -34,6 +35,19 @@ export default async function DashboardPage() {
     supabase.from('tours').select('*').in('id', tourIds).order('created_at', { ascending: true }),
     supabase.from('shows').select('id, tour_id, date, venue_name, city, color, show_time, show_duration').in('tour_id', tourIds).order('date', { ascending: true }),
   ])
+
+  const showIds = (allShows ?? []).map(s => s.id)
+  const { data: allTravelDays } = showIds.length > 0
+    ? await supabase.from('travel_days').select('id, show_id, date, destination').in('show_id', showIds)
+    : { data: [] }
+
+  // Resolve tour_id for each travel day via show lookup
+  const showTourMap: Record<string, string> = {}
+  for (const s of allShows ?? []) showTourMap[s.id] = s.tour_id
+  const travelDaysWithTour = (allTravelDays ?? []).map(td => ({
+    ...td,
+    tour_id: showTourMap[td.show_id] ?? '',
+  }))
 
   const today = new Date().toISOString().split('T')[0]
   const tourList = (tours ?? []) as Tour[]
@@ -77,6 +91,8 @@ export default async function DashboardPage() {
       } : null}
       isAdmin={true}
       adminTourIds={adminTourIds}
+      allShows={showList.map(s => ({ id: s.id, tour_id: s.tour_id, date: s.date, venue_name: s.venue_name, city: s.city, show_time: s.show_time ?? null }))}
+      allTravelDays={travelDaysWithTour}
     />
   )
 }
