@@ -664,6 +664,25 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
   const [sheetDir, setSheetDir] = useState(false)
   const [sheetContacts, setSheetContacts] = useState(false)
   const [sheetAddress, setSheetAddress] = useState(false)
+  const [editingHeader, setEditingHeader] = useState(false)
+  const [headerForm, setHeaderForm] = useState({ venue_name: data.venue_name, city: data.city, date: data.date })
+  const [savingHeader, setSavingHeader] = useState(false)
+
+  async function saveHeader() {
+    setSavingHeader(true)
+    const updates: Partial<typeof data> = {}
+    if (headerForm.venue_name !== data.venue_name) updates.venue_name = headerForm.venue_name
+    if (headerForm.city !== data.city) updates.city = headerForm.city
+    if (headerForm.date !== data.date) updates.date = headerForm.date
+    if (Object.keys(updates).length > 0) {
+      const { error } = await supabase.from('shows').update(updates).eq('id', data.id)
+      if (!error) {
+        for (const [k, v] of Object.entries(updates)) update(k as keyof typeof data, v as string)
+      }
+    }
+    setSavingHeader(false)
+    setEditingHeader(false)
+  }
   const [pickingCheck, setPickingCheck] = useState(false)
   const [infoSheet, setInfoSheet] = useState<'show' | 'sc' | 'aforo' | 'pantalla' | null>(null)
   const [showForm, setShowForm] = useState({ time: '', duration: '' })
@@ -1175,28 +1194,89 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
       {/* ── Hero card ── */}
       <div style={{ padding: '0 16px 20px' }}>
         <div style={{ backgroundColor: color, borderRadius: 20, padding: '16px 16px 14px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: 0 }}>
-          {/* Top: venue + city·date + address */}
+          {/* Top: venue + city·date */}
           <div style={{ marginBottom: 10 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <Editable value={data.venue_name} onSave={v => update('venue_name', v)} isAdmin={isAdmin}
-                  style={{ fontWeight: 800, fontSize: 24, color: '#1a1a1a', lineHeight: 1.15, display: 'block' }} />
+            {editingHeader ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, minWidth: 0, overflow: 'hidden' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(26,26,26,0.45)', margin: '0 0 3px', fontFamily: SYS }}>Venue</p>
+                    <input
+                      autoFocus
+                      value={headerForm.venue_name}
+                      onChange={e => setHeaderForm(f => ({ ...f, venue_name: e.target.value }))}
+                      style={{ width: '100%', boxSizing: 'border-box', background: 'transparent', border: 'none', borderBottom: '1.5px solid rgba(0,0,0,0.25)', outline: 'none', fontSize: 22, fontWeight: 800, color: '#1a1a1a', fontFamily: SYS, padding: '2px 0', lineHeight: 1.2 }}
+                    />
+                  </div>
+                  {bandLogoUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={bandLogoUrl} alt="" style={{ maxHeight: 22, width: 'auto', maxWidth: 70, objectFit: 'contain', marginTop: 18, flexShrink: 0 }} />
+                  )}
+                </div>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(26,26,26,0.45)', margin: '0 0 3px', fontFamily: SYS }}>Ciudad</p>
+                    <input
+                      value={headerForm.city}
+                      onChange={e => setHeaderForm(f => ({ ...f, city: e.target.value }))}
+                      style={{ width: '100%', boxSizing: 'border-box', background: 'transparent', border: 'none', borderBottom: '1.5px solid rgba(0,0,0,0.25)', outline: 'none', fontSize: 15, fontWeight: 500, color: '#1a1a1a', fontFamily: SYS, padding: '2px 0' }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(26,26,26,0.45)', margin: '0 0 3px', fontFamily: SYS }}>Fecha</p>
+                    <input
+                      type="date"
+                      value={headerForm.date}
+                      onChange={e => setHeaderForm(f => ({ ...f, date: e.target.value }))}
+                      style={{ width: '100%', boxSizing: 'border-box', background: 'transparent', border: 'none', borderBottom: '1.5px solid rgba(0,0,0,0.25)', outline: 'none', fontSize: 15, fontWeight: 500, color: '#1a1a1a', fontFamily: SYS, padding: '2px 0' }}
+                    />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8, marginTop: 2 }}>
+                  <button
+                    onClick={saveHeader}
+                    disabled={savingHeader}
+                    style={{ background: 'rgba(0,0,0,0.12)', border: 'none', borderRadius: 20, padding: '7px 16px', fontSize: 13, fontWeight: 700, color: '#1a1a1a', cursor: 'pointer', fontFamily: SYS, opacity: savingHeader ? 0.6 : 1 }}>
+                    {savingHeader ? '…' : 'Guardar'}
+                  </button>
+                  <button
+                    onClick={() => { setEditingHeader(false); setHeaderForm({ venue_name: data.venue_name, city: data.city, date: data.date }) }}
+                    style={{ background: 'none', border: 'none', padding: '7px 12px', fontSize: 13, color: 'rgba(26,26,26,0.5)', cursor: 'pointer', fontFamily: SYS }}>
+                    Cancelar
+                  </button>
+                </div>
               </div>
-              {bandLogoUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={bandLogoUrl} alt="" style={{ maxHeight: 24, width: 'auto', maxWidth: 80, objectFit: 'contain', marginLeft: 12, marginTop: 2, flexShrink: 0 }} />
-              )}
-            </div>
-            <p style={{ fontSize: 14, color: 'rgba(26,26,26,0.7)', margin: '4px 0 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              <span style={{ fontStyle: 'italic' }}>{data.city}</span>
-              {' · '}
-              <span style={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', fontSize: 13 }}>{fmt(data.date)}</span>
-            </p>
-            {isAdmin && (
-              <button onClick={() => setSheetAddress(true)}
-                style={{ display: 'block', background: 'none', border: 'none', padding: 0, cursor: 'pointer', marginTop: 5, fontFamily: SYS, fontSize: 12, color: 'rgba(26,26,26,0.5)', textAlign: 'left' }}>
-                Editar dirección
-              </button>
+            ) : (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+                  <div
+                    style={{ flex: 1, minWidth: 0, cursor: isAdmin ? 'text' : 'default' }}
+                    onClick={() => isAdmin && setEditingHeader(true)}
+                  >
+                    <p style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', margin: 0, fontFamily: SYS, lineHeight: 1.15 }}>
+                      {data.venue_name}
+                    </p>
+                  </div>
+                  {bandLogoUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={bandLogoUrl} alt="" style={{ maxHeight: 24, width: 'auto', maxWidth: 80, objectFit: 'contain', marginLeft: 12, marginTop: 2, flexShrink: 0 }} />
+                  )}
+                </div>
+                <p
+                  style={{ fontSize: 14, color: 'rgba(26,26,26,0.7)', margin: '4px 0 0 0', cursor: isAdmin ? 'text' : 'default' }}
+                  onClick={() => isAdmin && setEditingHeader(true)}
+                >
+                  <span style={{ fontStyle: 'italic' }}>{data.city}</span>
+                  {' · '}
+                  <span style={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', fontSize: 13 }}>{fmt(data.date)}</span>
+                </p>
+                {isAdmin && (
+                  <button onClick={() => setSheetAddress(true)}
+                    style={{ display: 'block', background: 'none', border: 'none', padding: 0, cursor: 'pointer', marginTop: 5, fontFamily: SYS, fontSize: 12, color: 'rgba(26,26,26,0.5)', textAlign: 'left' }}>
+                    Editar dirección
+                  </button>
+                )}
+              </div>
             )}
           </div>
           {/* Bottom: action buttons */}
