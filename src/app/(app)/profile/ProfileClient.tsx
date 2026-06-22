@@ -155,7 +155,7 @@ export default function ProfileClient({
   function cancelUsername() { setEditingUsername(false); setUsernameError(null) }
 
   const editActive: React.CSSProperties = {
-    padding: '12px 16px', background: '#FAFAFA',
+    padding: '12px 16px', background: '#F0F0F0',
     borderBottom: '0.5px solid #EBEBEB',
     display: 'flex', flexDirection: 'column', gap: 8,
   }
@@ -174,7 +174,7 @@ export default function ProfileClient({
   )
 
   return (
-    <div className="tp-page" style={{ minHeight: '100vh', background: '#F2F2F7', maxWidth: 390, margin: '0 auto', paddingBottom: 80, fontFamily: SYS }}>
+    <div className="tp-page" style={{ minHeight: '100vh', background: '#fff', maxWidth: 390, margin: '0 auto', paddingBottom: 80, fontFamily: SYS }}>
 
       {/* ── Hero ── */}
       <div style={{ background: '#fff', padding: '52px 20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', borderBottom: '1px solid #EBEBEB' }}>
@@ -243,7 +243,7 @@ export default function ProfileClient({
 
         {/* ── Datos personales ── */}
         <SL label="Datos" />
-        <div style={{ background: '#fff', borderRadius: 14, overflow: 'hidden' }}>
+        <div style={{ background: '#F5F5F5', borderRadius: 14, overflow: 'hidden' }}>
 
           {/* Nombre */}
           {editingName ? (
@@ -311,7 +311,7 @@ export default function ProfileClient({
 
         {/* ── Giras ── */}
         <SL label="Mis giras" />
-        <div style={{ background: '#fff', borderRadius: 14, overflow: 'hidden' }}>
+        <div style={{ background: '#F5F5F5', borderRadius: 14, overflow: 'hidden' }}>
           {validMemberships.length === 0 ? (
             <div style={{ padding: '24px 16px', textAlign: 'center' }}>
               <p style={{ fontSize: 14, color: '#C8C8C8', fontFamily: SYS, margin: 0 }}>Sin giras todavía</p>
@@ -352,7 +352,7 @@ export default function ProfileClient({
 
         {/* ── Cuenta ── */}
         <SL label="Cuenta" />
-        <div style={{ background: '#fff', borderRadius: 14, overflow: 'hidden' }}>
+        <div style={{ background: '#F5F5F5', borderRadius: 14, overflow: 'hidden' }}>
           <button onClick={handleResetPassword} style={{
             width: '100%', height: 56, padding: '0 16px',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
