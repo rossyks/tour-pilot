@@ -402,19 +402,15 @@ export default function TourClient({
               {(['proximos', 'historico'] as const).map(t => (
                 <button
                   key={t}
-                  onClick={() => {
-                    if (t === 'historico' && !initialTour.is_pro) { setUpgradeSheetOpen(true); return }
-                    setTab(t)
-                  }}
+                  onClick={() => setTab(t)}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 8px 0',
                     fontSize: 14, fontFamily: SYS,
                     fontWeight: tab === t ? 700 : 400,
                     color: tab === t ? '#1a1a1a' : '#999',
                     borderBottom: tab === t ? '2px solid #1a1a1a' : '2px solid transparent',
-                    display: 'flex', alignItems: 'center', gap: 4,
                   }}>
-                  {t === 'proximos' ? 'Próximos' : <>Histórico {!initialTour.is_pro && <span style={{ fontSize: 12 }}>🔒</span>}</>}
+                  {t === 'proximos' ? 'Próximos' : 'Histórico'}
                 </button>
               ))}
             </div>
