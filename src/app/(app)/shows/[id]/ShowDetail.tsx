@@ -1484,10 +1484,12 @@ export default function ShowDetail({ show, isAdmin, isPro, tourId, userId, tourM
                     onClick={() => isPro ? setVisSheet({ type: 'ticket', id: doc.id }) : setProUpgradeFeature('visibility')}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', flexShrink: 0 }}
                   >
-                    <span style={{ position: 'relative', fontSize: 16, lineHeight: 1 }}>
-                      👁
+                    <span style={{ position: 'relative', display: 'flex' }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={localTicketVis[doc.id] && localTicketVis[doc.id].size > 0 ? '#DC412C' : '#BBBBBB'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                      </svg>
                       {localTicketVis[doc.id] && localTicketVis[doc.id].size > 0 && (
-                        <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, background: '#DC412C', borderRadius: '50%', border: '1.5px solid #fff' }} />
+                        <span style={{ position: 'absolute', top: -2, right: -2, width: 7, height: 7, background: '#DC412C', borderRadius: '50%', border: '1.5px solid #fff' }} />
                       )}
                     </span>
                   </button>
@@ -1629,8 +1631,10 @@ export default function ShowDetail({ show, isAdmin, isPro, tourId, userId, tourM
                       {isAdmin && !isExpanded && (
                         <button onClick={e => { e.stopPropagation(); isPro ? setVisSheet({ type: 'schedule', id: item.id }) : setProUpgradeFeature('visibility') }}
                           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', flexShrink: 0 }}>
-                          <span style={{ position: 'relative', fontSize: 14, lineHeight: 1 }}>
-                            👁
+                          <span style={{ position: 'relative', display: 'flex' }}>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={isSchedRestricted ? '#DC412C' : '#BBBBBB'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                            </svg>
                             {isSchedRestricted && (
                               <span style={{ position: 'absolute', top: -2, right: -2, width: 7, height: 7, background: '#DC412C', borderRadius: '50%', border: '1.5px solid #fff' }} />
                             )}
@@ -2350,7 +2354,7 @@ export default function ShowDetail({ show, isAdmin, isPro, tourId, userId, tourM
               style={{ position: 'absolute', top: 18, right: 18, background: 'none', border: 'none', fontSize: 20, color: '#999', cursor: 'pointer', lineHeight: 1, padding: 4 }}>✕</button>
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 44, marginBottom: 14 }}>
-                {proUpgradeFeature === 'notify' ? '🔔' : proUpgradeFeature === 'travel' ? '🚌' : '👁'}
+                {proUpgradeFeature === 'notify' ? '🔔' : proUpgradeFeature === 'travel' ? '🚌' : '🔐'}
               </div>
               <p style={{ fontSize: 20, fontWeight: 800, color: '#1a1a1a', margin: '0 0 10px', fontFamily: SYS }}>
                 {proUpgradeFeature === 'notify' ? 'Notificaciones al equipo' : proUpgradeFeature === 'travel' ? 'Travel Days' : 'Visibilidad por persona'}
