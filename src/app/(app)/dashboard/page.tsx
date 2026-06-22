@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { Tour, Show, TOUR_COLORS } from '@/lib/types'
+import { Tour, Show, SHOW_COLORS } from '@/lib/types'
 import DashboardClient from './DashboardClient'
 
 export default async function DashboardPage() {
@@ -70,7 +70,7 @@ export default async function DashboardPage() {
     if (!nextShow) return null
     const tourShows = showList.filter(s => s.tour_id === nextShow.tour_id).sort((a, b) => a.date.localeCompare(b.date))
     const idx = tourShows.findIndex(s => s.id === nextShow.id)
-    return TOUR_COLORS[Math.max(idx, 0) % TOUR_COLORS.length]
+    return SHOW_COLORS[Math.max(idx, 0) % SHOW_COLORS.length]
   })()
   const nextShowTour = nextShow ? tourList.find(t => t.id === nextShow.tour_id) ?? null : null
 

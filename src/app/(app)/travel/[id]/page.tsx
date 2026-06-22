@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { TravelDay, TravelScheduleItem, TravelDocument, TOUR_COLORS } from '@/lib/types'
+import { TravelDay, TravelScheduleItem, TravelDocument, SHOW_COLORS } from '@/lib/types'
 import TravelClient from './TravelClient'
 
 export default async function TravelPage({ params }: { params: Promise<{ id: string }> }) {
@@ -33,7 +33,7 @@ export default async function TravelPage({ params }: { params: Promise<{ id: str
 
   // Compute color by position of linked show in date-sorted tour shows
   const showIndex = (tourShows ?? []).findIndex((s: { id: string }) => s.id === travelDay.show_id)
-  const showColor = TOUR_COLORS[Math.max(showIndex, 0) % TOUR_COLORS.length]
+  const showColor = SHOW_COLORS[Math.max(showIndex, 0) % SHOW_COLORS.length]
 
   const { data: membership } = user && tourId
     ? await supabase.from('tour_members').select('role').eq('tour_id', tourId).eq('user_id', user.id).single()

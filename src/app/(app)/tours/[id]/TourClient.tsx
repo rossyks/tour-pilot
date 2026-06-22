@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Show, TravelDay, TourMember, TOUR_COLORS } from '@/lib/types'
+import { Show, TravelDay, TourMember, SHOW_COLORS } from '@/lib/types'
 import { useScrollLock } from '@/lib/useScrollLock'
 
 const SYS = "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif"
@@ -206,7 +206,7 @@ export default function TourClient({
     try {
       const dates = [...shows.map(s => s.date), form.date].sort((a, b) => a.localeCompare(b))
       const positionIndex = Math.max(0, dates.indexOf(form.date))
-      const color = TOUR_COLORS[positionIndex % TOUR_COLORS.length]
+      const color = SHOW_COLORS[positionIndex % SHOW_COLORS.length]
       console.log('[create show] venue:', form.venue_name, 'city:', form.city, 'date:', form.date, 'tour_id:', initialTour.id, 'color:', color)
       const { data, error } = await supabase.from('shows').insert({
         tour_id: initialTour.id,
@@ -302,13 +302,13 @@ export default function TourClient({
 
   // Assign colors by sorted date position — never from DB field
   const sortedShows = [...shows].sort((a, b) => a.date.localeCompare(b.date))
-  const showColorMap = new Map(sortedShows.map((s, i) => [s.id, TOUR_COLORS[i % TOUR_COLORS.length]]))
+  const showColorMap = new Map(sortedShows.map((s, i) => [s.id, SHOW_COLORS[i % SHOW_COLORS.length]]))
 
   // Build intercalated list (all items)
   const allItems: ListItem[] = [
     ...shows.map((show, i) => ({ _type: 'show' as const, show, showIndex: i })),
     ...travelDays.map(travel => {
-      const showColor = showColorMap.get(travel.show_id) ?? TOUR_COLORS[0]
+      const showColor = showColorMap.get(travel.show_id) ?? SHOW_COLORS[0]
       return { _type: 'travel' as const, travel, showColor }
     }),
   ].sort((a, b) => {
@@ -483,7 +483,7 @@ export default function TourClient({
 
           if (item._type === 'show') {
             const { show } = item
-            const accentColor = showColorMap.get(show.id) ?? TOUR_COLORS[0]
+            const accentColor = showColorMap.get(show.id) ?? SHOW_COLORS[0]
             const card = (
               <Link key={show.id} href={`/shows/${show.id}`} style={{ textDecoration: 'none', display: 'block' }}>
                 <div

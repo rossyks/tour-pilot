@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { TravelDay, TravelScheduleItem, TravelDocument, TOUR_COLORS } from '@/lib/types'
+import { TravelDay, TravelScheduleItem, TravelDocument, SHOW_COLORS } from '@/lib/types'
 import { useScrollLock } from '@/lib/useScrollLock'
 
 const SYS = "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif"
@@ -119,7 +119,7 @@ export default function TravelClient({
   const [uploading, setUploading] = useState(false)
   const [deletingDocId, setDeletingDocId] = useState<string | null>(null)
 
-  const color = showColor ?? TOUR_COLORS[0]
+  const color = showColor ?? SHOW_COLORS[0]
 
   async function handleDeleteTravel() {
     await supabase.from('travel_days').delete().eq('id', td.id)

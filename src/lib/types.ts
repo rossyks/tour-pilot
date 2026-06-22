@@ -152,4 +152,5 @@ export interface ScheduleVisibility {
   user_id: string
 }
 
-export const TOUR_COLORS = ['#A4B2DA', '#A99F49', '#C4A882', '#9BBFA8', '#D4A5A5']
+export const SHOW_COLORS = ['#A4B2DA', '#A99F49']
+export const TOUR_COLORS = ['#A4B2DA', '#A99F49', '#DC412C', '#B090F5', '#D0B53C', '#7EC8C8']

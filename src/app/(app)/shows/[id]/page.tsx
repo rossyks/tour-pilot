@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import { Show, TourMember, TicketVisibility, ScheduleVisibility, TOUR_COLORS } from '@/lib/types'
+import { Show, TourMember, TicketVisibility, ScheduleVisibility, SHOW_COLORS } from '@/lib/types'
 import ShowDetail from './ShowDetail'
 
 export default async function ShowPage({ params }: { params: Promise<{ id: string }> }) {
@@ -24,7 +24,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
 
   // tourShows ordered by date ASC — index = positional color
   const showIndex = (tourShows ?? []).findIndex((s: { id: string }) => s.id === id)
-  const showColor = TOUR_COLORS[Math.max(showIndex, 0) % TOUR_COLORS.length]
+  const showColor = SHOW_COLORS[Math.max(showIndex, 0) % SHOW_COLORS.length]
 
   const myMembership = user
     ? (tourMembers ?? []).find((m: { user_id: string; role: string }) => m.user_id === user.id)
