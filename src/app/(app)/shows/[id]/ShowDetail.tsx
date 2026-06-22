@@ -667,6 +667,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
   const [mountedPortal, setMountedPortal] = useState(false)
   const [sheetNotify, setSheetNotify] = useState(false)
   const [notifyMsg, setNotifyMsg] = useState('')
+  const [notifySubject, setNotifySubject] = useState('')
   const [notifyRecipients, setNotifyRecipients] = useState<string[]>([])
   const [sendingNotify, setSendingNotify] = useState(false)
   const [notifyToast, setNotifyToast] = useState<string | null>(null)
@@ -683,7 +684,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
   }
 
   async function sendNotification() {
-    if (!notifyMsg.trim() || !notifyRecipients.length) return
+    if (!notifySubject.trim() || !notifyMsg.trim() || !notifyRecipients.length) return
     setSendingNotify(true)
     try {
       supabase.from('notifications').insert({
@@ -693,7 +694,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
       const res = await fetch('/api/notifications/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ show_id: data.id, message: notifyMsg.trim(), recipient_ids: notifyRecipients }),
+        body: JSON.stringify({ show_id: data.id, subject: notifySubject.trim(), message: notifyMsg.trim(), recipient_ids: notifyRecipients }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`)
@@ -705,6 +706,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
       setSendingNotify(false)
       setSheetNotify(false)
       setNotifyMsg('')
+      setNotifySubject('')
       setTimeout(() => setNotifyToast(null), 3000)
     }
   }
@@ -2239,6 +2241,15 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
               style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }} />
             <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px 40px', zIndex: 9999, maxHeight: '90vh', overflowY: 'auto', WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
               <p style={{ fontSize: 18, fontWeight: 700, color: '#1a1a1a', margin: '0 0 20px', fontFamily: SYS }}>Notificar equipo</p>
+              <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', margin: '0 0 8px', fontFamily: SYS }}>Asunto</p>
+              <input
+                value={notifySubject}
+                onChange={e => setNotifySubject(e.target.value)}
+                placeholder='Ej: Horarios actualizados para el show'
+                style={{ width: '100%', boxSizing: 'border-box' as const, background: '#F5F5F5', border: '1.5px solid transparent', borderRadius: 12, padding: '12px 14px', fontSize: 16, fontFamily: SYS, outline: 'none', color: '#1a1a1a', transition: 'border-color 0.15s', marginBottom: 16 }}
+                onFocus={e => (e.target.style.borderColor = '#1a1a1a')}
+                onBlur={e => (e.target.style.borderColor = 'transparent')}
+              />
               <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', margin: '0 0 8px', fontFamily: SYS }}>Mensaje</p>
               <textarea
                 autoFocus
@@ -2315,8 +2326,8 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
               </div>
               <button
                 onClick={sendNotification}
-                disabled={sendingNotify || !notifyMsg.trim() || !notifyRecipients.length}
-                style={{ width: '100%', height: 48, background: '#1a1a1a', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700, color: '#fff', cursor: sendingNotify || !notifyMsg.trim() || !notifyRecipients.length ? 'default' : 'pointer', fontFamily: SYS, marginTop: 20, opacity: sendingNotify || !notifyMsg.trim() || !notifyRecipients.length ? 0.4 : 1 }}>
+                disabled={sendingNotify || !notifySubject.trim() || !notifyMsg.trim() || !notifyRecipients.length}
+                style={{ width: '100%', height: 48, background: '#1a1a1a', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700, color: '#fff', cursor: sendingNotify || !notifySubject.trim() || !notifyMsg.trim() || !notifyRecipients.length ? 'default' : 'pointer', fontFamily: SYS, marginTop: 20, opacity: sendingNotify || !notifySubject.trim() || !notifyMsg.trim() || !notifyRecipients.length ? 0.4 : 1 }}>
                 {sendingNotify ? 'Enviando…' : 'Enviar'}
               </button>
             </div>

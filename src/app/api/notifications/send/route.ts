@@ -11,8 +11,9 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { show_id, message, recipient_ids } = await req.json() as {
+  const { show_id, subject: customSubject, message, recipient_ids } = await req.json() as {
     show_id: string
+    subject: string
     message: string
     recipient_ids: string[]
   }
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
   )
 
   const senderName = sender?.full_name ?? 'Alguien del equipo'
-  const subject = `Tour Pilot — ${show.venue_name} · ${fmtDate(show.date)}`
+  const subject = customSubject?.trim() || `Tour Pilot — ${show.venue_name} · ${fmtDate(show.date)}`
   const showUrl = `https://tour-pilot-bice.vercel.app/shows/${show_id}`
 
   let sent = 0
