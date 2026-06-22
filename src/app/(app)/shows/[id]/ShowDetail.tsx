@@ -90,11 +90,11 @@ function Editable({ value, placeholder = '—', onSave, isAdmin, style = {}, mul
       </div>
     </div>
   ) : (
-    <div style={{ display: 'flex', gap: 8, alignItems: 'center', width: '100%' }}>
+    <div style={{ display: 'flex', gap: 8, alignItems: 'center', width: '100%', minWidth: 0, overflow: 'hidden' }}>
       <input autoFocus value={val} onChange={e => setVal(e.target.value)} onKeyDown={e => e.key === 'Enter' && save()}
-        style={{ background: 'transparent', borderBottom: '2px solid #1a1a1a', outline: 'none', flex: 1, paddingBottom: 2, fontFamily: SYS, fontSize: (style.fontSize as number) ?? 15, fontWeight: style.fontWeight ?? 400 }} />
-      <button onClick={save} style={{ fontSize: 12, fontWeight: 700, background: '#1a1a1a', color: '#fff', padding: '6px 12px', borderRadius: 20, border: 'none', cursor: 'pointer', fontFamily: SYS }}>{saving ? '…' : '✓'}</button>
-      <button onClick={() => { setEditing(false); setVal(value ?? '') }} style={{ color: '#888', fontSize: 14, minWidth: 28, background: 'none', border: 'none', cursor: 'pointer', fontFamily: SYS }}>✕</button>
+        style={{ background: 'transparent', border: 'none', borderBottom: '1.5px solid rgba(0,0,0,0.3)', outline: 'none', flex: 1, minWidth: 0, width: '100%', boxSizing: 'border-box', padding: '0 0 2px 0', margin: 0, fontFamily: SYS, fontSize: (style.fontSize as number) ?? 15, fontWeight: style.fontWeight ?? 400, color: (style.color as string) ?? '#1a1a1a', lineHeight: (style.lineHeight as string | number) ?? 1.2 }} />
+      <button onClick={save} style={{ fontSize: 12, fontWeight: 700, background: '#1a1a1a', color: '#fff', padding: '6px 12px', borderRadius: 20, border: 'none', cursor: 'pointer', fontFamily: SYS, flexShrink: 0 }}>{saving ? '…' : '✓'}</button>
+      <button onClick={() => { setEditing(false); setVal(value ?? '') }} style={{ color: '#888', fontSize: 14, minWidth: 28, background: 'none', border: 'none', cursor: 'pointer', fontFamily: SYS, flexShrink: 0 }}>✕</button>
     </div>
   )
 
