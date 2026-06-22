@@ -665,6 +665,7 @@ export default function ShowDetail({ show, isAdmin, isPro, tourId, userId, tourM
   const [sheetContacts, setSheetContacts] = useState(false)
   const [sheetAddress, setSheetAddress] = useState(false)
   const [mountedPortal, setMountedPortal] = useState(false)
+  const [proUpgradeFeature, setProUpgradeFeature] = useState<'visibility' | 'notify' | null>(null)
   const [sheetNotify, setSheetNotify] = useState(false)
   const [notifyMsg, setNotifyMsg] = useState('')
   const [notifySubject, setNotifySubject] = useState('')
@@ -1401,24 +1402,21 @@ export default function ShowDetail({ show, isAdmin, isPro, tourId, userId, tourM
       {/* ── Notificar equipo ── */}
       {isAdmin && (
         <div style={{ padding: '0 16px 12px' }}>
-          {isPro ? (
-            <button
-              onClick={openNotifySheet}
-              style={{
-                width: '100%', height: 40, background: '#F5F5F5', border: 'none',
-                borderRadius: 20, cursor: 'pointer', fontFamily: SYS,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-                fontSize: 13, fontWeight: 600, color: '#1a1a1a',
-              }}>
-              <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='#1a1a1a' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
-                <path d='M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9'/>
-                <path d='M13.73 21a2 2 0 0 1-3.46 0'/>
-              </svg>
-              Notificar equipo
-            </button>
-          ) : (
-            <p style={{ fontSize: 12, color: '#999', margin: 0, textAlign: 'center', fontFamily: SYS }}>🔒 Notificaciones disponibles en Pro</p>
-          )}
+          <button
+            onClick={() => isPro ? openNotifySheet() : setProUpgradeFeature('notify')}
+            style={{
+              width: '100%', height: 40, background: '#F5F5F5', border: 'none',
+              borderRadius: 20, cursor: 'pointer', fontFamily: SYS,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+              fontSize: 13, fontWeight: 600, color: '#1a1a1a',
+            }}>
+            <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='#1a1a1a' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+              <path d='M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9'/>
+              <path d='M13.73 21a2 2 0 0 1-3.46 0'/>
+            </svg>
+            Notificar equipo
+            {!isPro && <span style={{ fontSize: 10, fontWeight: 700, color: '#fff', background: '#1a1a1a', borderRadius: 4, padding: '2px 5px', marginLeft: 2 }}>PRO</span>}
+          </button>
         </div>
       )}
 
@@ -1479,9 +1477,9 @@ export default function ShowDetail({ show, isAdmin, isPro, tourId, userId, tourM
                     <span style={{ fontSize: 12, fontWeight: 500, color: '#007AFF', fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{doc.label || 'Billete'}</span>
                   </div>
                 </a>
-                {isAdmin && isPro && (
+                {isAdmin && (
                   <button
-                    onClick={() => setVisSheet({ type: 'ticket', id: doc.id })}
+                    onClick={() => isPro ? setVisSheet({ type: 'ticket', id: doc.id }) : setProUpgradeFeature('visibility')}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', flexShrink: 0 }}
                   >
                     <span style={{ position: 'relative', fontSize: 16, lineHeight: 1 }}>
@@ -1626,8 +1624,8 @@ export default function ShowDetail({ show, isAdmin, isPro, tourId, userId, tourM
                           <p style={{ fontSize: 13, color: '#999', margin: 0, fontFamily: SYS }}>{item.subtitle}</p>
                         )}
                       </button>
-                      {isAdmin && isPro && !isExpanded && (
-                        <button onClick={e => { e.stopPropagation(); setVisSheet({ type: 'schedule', id: item.id }) }}
+                      {isAdmin && !isExpanded && (
+                        <button onClick={e => { e.stopPropagation(); isPro ? setVisSheet({ type: 'schedule', id: item.id }) : setProUpgradeFeature('visibility') }}
                           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', flexShrink: 0 }}>
                           <span style={{ position: 'relative', fontSize: 14, lineHeight: 1 }}>
                             👁
@@ -2337,6 +2335,39 @@ export default function ShowDetail({ show, isAdmin, isPro, tourId, userId, tourM
             </div>
           </>
         ) : <></>,
+        document.body
+      )}
+
+      {/* ── Pro upgrade sheet ── */}
+      {mountedPortal && proUpgradeFeature && createPortal(
+        <>
+          <div onClick={() => setProUpgradeFeature(null)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }} />
+          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '28px 24px 48px', zIndex: 9999, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
+            <button onClick={() => setProUpgradeFeature(null)}
+              style={{ position: 'absolute', top: 18, right: 18, background: 'none', border: 'none', fontSize: 20, color: '#999', cursor: 'pointer', lineHeight: 1, padding: 4 }}>✕</button>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 44, marginBottom: 14 }}>
+                {proUpgradeFeature === 'notify' ? '🔔' : '👁'}
+              </div>
+              <p style={{ fontSize: 20, fontWeight: 800, color: '#1a1a1a', margin: '0 0 10px', fontFamily: SYS }}>
+                {proUpgradeFeature === 'notify' ? 'Notificaciones al equipo' : 'Visibilidad por persona'}
+              </p>
+              <p style={{ fontSize: 14, color: '#666', margin: '0 0 28px', fontFamily: SYS, lineHeight: 1.6 }}>
+                {proUpgradeFeature === 'notify'
+                  ? 'Envía mensajes directamente al email de cada miembro del equipo desde la app. Disponible en el plan Pro.'
+                  : 'Controla qué miembros del equipo pueden ver cada billete o tramo del horario. Disponible en el plan Pro.'}
+              </p>
+              <button style={{ width: '100%', height: 52, background: '#1a1a1a', border: 'none', borderRadius: 12, fontSize: 16, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: SYS, marginBottom: 10 }}>
+                Desbloquear Pro
+              </button>
+              <button onClick={() => setProUpgradeFeature(null)}
+                style={{ width: '100%', height: 44, background: '#F5F5F5', border: 'none', borderRadius: 12, fontSize: 14, fontWeight: 500, color: '#666', cursor: 'pointer', fontFamily: SYS }}>
+                Más información
+              </button>
+            </div>
+          </div>
+        </>,
         document.body
       )}
 
