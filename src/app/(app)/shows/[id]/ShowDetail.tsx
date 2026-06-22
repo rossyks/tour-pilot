@@ -1350,14 +1350,14 @@ export default function ShowDetail({ show, isAdmin, isPro, tourId, userId, tourM
               onClick={() => isPro ? handleTravelDay('before') : setProUpgradeFeature('travel')}
               disabled={isPro && creatingTravel === 'before'}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12, color: '#999', fontFamily: SYS, opacity: isPro && creatingTravel === 'before' ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: 4 }}>
-              {travelDayBefore ? 'Ver Travel Day antes' : '+ Travel Day antes'}
+              {'+ Travel Day antes'}
               {!isPro && <span style={{ fontSize: 9, fontWeight: 700, color: '#fff', background: '#1a1a1a', borderRadius: 3, padding: '1px 4px' }}>PRO</span>}
             </button>
             <button
               onClick={() => isPro ? handleTravelDay('after') : setProUpgradeFeature('travel')}
               disabled={isPro && creatingTravel === 'after'}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12, color: '#999', fontFamily: SYS, opacity: isPro && creatingTravel === 'after' ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: 4 }}>
-              {travelDayAfter ? 'Ver Travel Day después' : '+ Travel Day después'}
+              {'+ Travel Day después'}
               {!isPro && <span style={{ fontSize: 9, fontWeight: 700, color: '#fff', background: '#1a1a1a', borderRadius: 3, padding: '1px 4px' }}>PRO</span>}
             </button>
           </div>
@@ -1572,7 +1572,7 @@ export default function ShowDetail({ show, isAdmin, isPro, tourId, userId, tourM
         </div>
 
         {/* Timeline */}
-        <div style={{ position: 'relative', marginBottom: 28, paddingLeft: 0 }}>
+        <div style={{ position: 'relative', marginBottom: 28, paddingLeft: 0, marginTop: 8 }}>
 
           {schedule.length === 0 && !addingSched && (
             <p style={{ fontSize: 15, color: '#C0C0C0', margin: 0 }}>Sin horario todavía</p>
