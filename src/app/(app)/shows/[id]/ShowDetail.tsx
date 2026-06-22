@@ -611,7 +611,7 @@ function ImageViewer({ url, onClose }: { url: string; onClose: () => void }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers, ticketVisibility, scheduleVisibility, color: colorProp, bandLogoUrl }: { show: Show; isAdmin: boolean; tourId: string; userId: string | null; tourMembers: TourMember[]; ticketVisibility: TicketVisibility[]; scheduleVisibility: ScheduleVisibility[]; color?: string; bandLogoUrl?: string | null }) {
+export default function ShowDetail({ show, isAdmin, isPro, tourId, userId, tourMembers, ticketVisibility, scheduleVisibility, color: colorProp, bandLogoUrl }: { show: Show; isAdmin: boolean; isPro: boolean; tourId: string; userId: string | null; tourMembers: TourMember[]; ticketVisibility: TicketVisibility[]; scheduleVisibility: ScheduleVisibility[]; color?: string; bandLogoUrl?: string | null }) {
   const supabase = createClient()
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
@@ -1342,8 +1342,8 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
           </div>
         </div>
 
-        {/* Travel day buttons — admin only */}
-        {isAdmin && (
+        {/* Travel day buttons — admin + pro only */}
+        {isAdmin && isPro && (
           <div style={{ display: 'flex', gap: 20, marginTop: 10, paddingLeft: 2 }}>
             <button
               onClick={() => handleTravelDay('before')}
@@ -1401,20 +1401,24 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
       {/* ── Notificar equipo ── */}
       {isAdmin && (
         <div style={{ padding: '0 16px 12px' }}>
-          <button
-            onClick={openNotifySheet}
-            style={{
-              width: '100%', height: 40, background: '#F5F5F5', border: 'none',
-              borderRadius: 20, cursor: 'pointer', fontFamily: SYS,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-              fontSize: 13, fontWeight: 600, color: '#1a1a1a',
-            }}>
-            <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='#1a1a1a' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
-              <path d='M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9'/>
-              <path d='M13.73 21a2 2 0 0 1-3.46 0'/>
-            </svg>
-            Notificar equipo
-          </button>
+          {isPro ? (
+            <button
+              onClick={openNotifySheet}
+              style={{
+                width: '100%', height: 40, background: '#F5F5F5', border: 'none',
+                borderRadius: 20, cursor: 'pointer', fontFamily: SYS,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                fontSize: 13, fontWeight: 600, color: '#1a1a1a',
+              }}>
+              <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='#1a1a1a' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+                <path d='M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9'/>
+                <path d='M13.73 21a2 2 0 0 1-3.46 0'/>
+              </svg>
+              Notificar equipo
+            </button>
+          ) : (
+            <p style={{ fontSize: 12, color: '#999', margin: 0, textAlign: 'center', fontFamily: SYS }}>🔒 Notificaciones disponibles en Pro</p>
+          )}
         </div>
       )}
 
@@ -1475,7 +1479,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
                     <span style={{ fontSize: 12, fontWeight: 500, color: '#007AFF', fontFamily: SYS, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{doc.label || 'Billete'}</span>
                   </div>
                 </a>
-                {isAdmin && (
+                {isAdmin && isPro && (
                   <button
                     onClick={() => setVisSheet({ type: 'ticket', id: doc.id })}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', flexShrink: 0 }}
@@ -1622,7 +1626,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
                           <p style={{ fontSize: 13, color: '#999', margin: 0, fontFamily: SYS }}>{item.subtitle}</p>
                         )}
                       </button>
-                      {isAdmin && !isExpanded && (
+                      {isAdmin && isPro && !isExpanded && (
                         <button onClick={e => { e.stopPropagation(); setVisSheet({ type: 'schedule', id: item.id }) }}
                           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', flexShrink: 0 }}>
                           <span style={{ position: 'relative', fontSize: 14, lineHeight: 1 }}>

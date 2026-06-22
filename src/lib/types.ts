@@ -8,7 +8,10 @@ export interface Tour {
   invite_code_band: string | null
   invite_code_artist: string | null
   invite_code_crew: string | null
+  invite_code_admin: string | null
   band_logo_url: string | null
+  is_pro: boolean
+  total_shows_created: number
   shows?: Show[]
 }
 

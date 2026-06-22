@@ -130,6 +130,12 @@ function SwipeTourRow({
             <span style={{ fontSize: 11, fontWeight: 700, color: '#1a1a1a', background: 'rgba(0,0,0,0.12)', borderRadius: 20, padding: '3px 8px', flexShrink: 0, fontFamily: SYS }}>
               {stats.count} {stats.count === 1 ? 'show' : 'shows'}
             </span>
+            {tour.is_pro
+              ? <span style={{ fontSize: 10, fontWeight: 700, color: '#fff', background: '#1a1a1a', borderRadius: 4, padding: '2px 6px', flexShrink: 0, fontFamily: SYS }}>PRO</span>
+              : tour.total_shows_created >= 3
+                ? <span style={{ fontSize: 10, fontWeight: 700, color: '#fff', background: '#DC412C', borderRadius: 4, padding: '2px 6px', flexShrink: 0, fontFamily: SYS }}>FREE · Límite</span>
+                : null
+            }
           </div>
           {stats.nextDate ? (
             <p style={{ fontSize: 12, color: 'rgba(26,26,26,0.6)', margin: 0, fontFamily: SYS }}>

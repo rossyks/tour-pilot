@@ -125,7 +125,7 @@ function SwipeDeleteRow({
 export default function TourClient({
   tour: initialTour, shows: initialShows, travelDays: initialTravelDays, isAdmin, isOwner, tourMembers: initialTourMembers, userId,
 }: {
-  tour: { id: string; name: string; band_tag: string | null; invite_code_band: string | null; invite_code_artist: string | null; invite_code_crew: string | null; invite_code_admin: string | null; owner_id: string | null; band_logo_url: string | null }
+  tour: { id: string; name: string; band_tag: string | null; invite_code_band: string | null; invite_code_artist: string | null; invite_code_crew: string | null; invite_code_admin: string | null; owner_id: string | null; band_logo_url: string | null; is_pro: boolean; total_shows_created: number }
   shows: Show[]
   travelDays: TravelDay[]
   isAdmin: boolean
@@ -159,8 +159,11 @@ export default function TourClient({
   const [bandLogoUrl, setBandLogoUrl] = useState<string | null>(initialTour.band_logo_url)
   const bandLogoInputRef = useRef<HTMLInputElement>(null)
   const [confirmDeleteLogo, setConfirmDeleteLogo] = useState(false)
+  const [upgradeSheetOpen, setUpgradeSheetOpen] = useState(false)
 
-  useScrollLock(sheetOpen || teamSheetOpen || transferSheet || !!confirmRoleChange || !!confirmRemove || !!confirmTransfer)
+  const canAddShow = initialTour.is_pro || initialTour.total_shows_created < 3
+
+  useScrollLock(sheetOpen || teamSheetOpen || transferSheet || upgradeSheetOpen || !!confirmRoleChange || !!confirmRemove || !!confirmTransfer)
   const [form, setForm] = useState({
     venue_name: '', city: '', date: '', show_time: '', soundcheck_time: '',
   })
@@ -221,7 +224,10 @@ export default function TourClient({
       }).select().single()
       console.log('[create show] result:', data, 'error:', error)
       if (error) { setCreateError(error.message); setSaving(false); return }
-      if (data) router.push(`/shows/${data.id}`)
+      if (data) {
+        await supabase.from('tours').update({ total_shows_created: initialTour.total_shows_created + 1 }).eq('id', initialTour.id)
+        router.push(`/shows/${data.id}`)
+      }
     } catch (err: unknown) {
       console.error('[create show] exception:', err)
       setCreateError(err instanceof Error ? err.message : 'Error desconocido')
@@ -396,20 +402,24 @@ export default function TourClient({
               {(['proximos', 'historico'] as const).map(t => (
                 <button
                   key={t}
-                  onClick={() => setTab(t)}
+                  onClick={() => {
+                    if (t === 'historico' && !initialTour.is_pro) { setUpgradeSheetOpen(true); return }
+                    setTab(t)
+                  }}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 8px 0',
                     fontSize: 14, fontFamily: SYS,
                     fontWeight: tab === t ? 700 : 400,
                     color: tab === t ? '#1a1a1a' : '#999',
                     borderBottom: tab === t ? '2px solid #1a1a1a' : '2px solid transparent',
+                    display: 'flex', alignItems: 'center', gap: 4,
                   }}>
-                  {t === 'proximos' ? 'Próximos' : 'Histórico'}
+                  {t === 'proximos' ? 'Próximos' : <>Histórico {!initialTour.is_pro && <span style={{ fontSize: 12 }}>🔒</span>}</>}
                 </button>
               ))}
             </div>
             {isAdmin && tab === 'proximos' && (
-              <button onClick={() => setSheetOpen(true)}
+              <button onClick={() => canAddShow ? setSheetOpen(true) : setUpgradeSheetOpen(true)}
                 style={{
                   background: '#1a1a1a', border: 'none', borderRadius: 20,
                   padding: '5px 12px', marginBottom: 8,
@@ -439,7 +449,7 @@ export default function TourClient({
             <p style={{ fontSize: 14, color: '#999', margin: '0 0 24px', fontFamily: SYS, textAlign: 'center' }}>Añade el primer concierto de esta gira</p>
             {isAdmin && (
               <button
-                onClick={() => setSheetOpen(true)}
+                onClick={() => canAddShow ? setSheetOpen(true) : setUpgradeSheetOpen(true)}
                 style={{ height: 48, background: '#1a1a1a', border: 'none', borderRadius: 20, fontSize: 15, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: SYS, padding: '0 28px', marginTop: 24 }}>
                 + Añadir fecha
               </button>
@@ -459,7 +469,7 @@ export default function TourClient({
                 </svg>
                 <p style={{ fontSize: 15, color: '#999', margin: '14px 0 0', fontFamily: SYS, textAlign: 'center' }}>No hay fechas próximas</p>
                 {isAdmin && (
-                  <button onClick={() => setSheetOpen(true)}
+                  <button onClick={() => canAddShow ? setSheetOpen(true) : setUpgradeSheetOpen(true)}
                     style={{ height: 44, background: '#1a1a1a', border: 'none', borderRadius: 20, fontSize: 14, fontWeight: 600, color: '#fff', cursor: 'pointer', fontFamily: SYS, padding: '0 24px', marginTop: 16 }}>
                     + Añadir fecha
                   </button>
@@ -926,6 +936,31 @@ export default function TourClient({
           </>
         )}
 
+        {/* ── Upgrade sheet ── */}
+        {upgradeSheetOpen && (
+          <>
+            <div onClick={() => setUpgradeSheetOpen(false)}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998 }} />
+            <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px 48px', zIndex: 9999 }}>
+              <button onClick={() => setUpgradeSheetOpen(false)}
+                style={{ position: 'absolute', top: 18, right: 18, background: 'none', border: 'none', fontSize: 20, color: '#999', cursor: 'pointer', lineHeight: 1, padding: 4 }}>✕</button>
+              <div style={{ textAlign: 'center', padding: '16px 0 28px' }}>
+                <div style={{ fontSize: 48, marginBottom: 16 }}>🔒</div>
+                <p style={{ fontSize: 22, fontWeight: 800, color: '#1a1a1a', margin: '0 0 12px', fontFamily: SYS }}>Límite alcanzado</p>
+                <p style={{ fontSize: 15, color: '#666', margin: '0 0 32px', fontFamily: SYS, lineHeight: 1.5 }}>
+                  Las giras gratuitas tienen un máximo de 3 fechas. Actualiza a Pro para añadir fechas ilimitadas.
+                </p>
+                <button style={{ width: '100%', height: 52, background: '#1a1a1a', border: 'none', borderRadius: 12, fontSize: 16, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: SYS, marginBottom: 10 }}>
+                  Actualizar a Pro
+                </button>
+                <button onClick={() => setUpgradeSheetOpen(false)}
+                  style={{ width: '100%', height: 48, background: '#F5F5F5', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 500, color: '#666', cursor: 'pointer', fontFamily: SYS }}>
+                  Más información
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </Portal>
     </div>
   )
