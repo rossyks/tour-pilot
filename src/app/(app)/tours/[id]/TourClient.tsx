@@ -5,8 +5,21 @@ import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { Show, TravelDay, TourMember, SHOW_COLORS } from '@/lib/types'
+import { Show, TravelDay, TourMember, SHOW_COLORS, TOUR_COLORS } from '@/lib/types'
 import { useScrollLock } from '@/lib/useScrollLock'
+
+function haversine(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371
+  const dLat = (lat2 - lat1) * Math.PI / 180
+  const dLon = (lon2 - lon1) * Math.PI / 180
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+function fmtCardDate(iso: string) {
+  return new Date(iso + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }).replace('.', '').toUpperCase()
+}
 
 const SYS = "-apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif"
 
@@ -158,8 +171,14 @@ export default function TourClient({
   const [bandLogoUrl, setBandLogoUrl] = useState<string | null>(initialTour.band_logo_url)
   const bandLogoInputRef = useRef<HTMLInputElement>(null)
   const [confirmDeleteLogo, setConfirmDeleteLogo] = useState(false)
+  const [shareSheetOpen, setShareSheetOpen] = useState(false)
+  const [shareSelectedIds, setShareSelectedIds] = useState<Set<string>>(new Set())
+  const [shareGenerating, setShareGenerating] = useState(false)
+  const [shareImageUrl, setShareImageUrl] = useState<string | null>(null)
+  const [shareImageBlob, setShareImageBlob] = useState<Blob | null>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
 
-  useScrollLock(sheetOpen || teamSheetOpen || transferSheet || !!confirmRoleChange || !!confirmRemove || !!confirmTransfer)
+  useScrollLock(sheetOpen || teamSheetOpen || transferSheet || shareSheetOpen || !!confirmRoleChange || !!confirmRemove || !!confirmTransfer)
   const [form, setForm] = useState({
     venue_name: '', city: '', date: '', show_time: '', soundcheck_time: '',
   })
@@ -421,6 +440,30 @@ export default function TourClient({
             )}
           </div>
           <div style={{ height: '0.5px', background: '#F0F0F0' }} />
+        </div>
+      )}
+
+      {/* Compartir gira */}
+      {(isAdmin || isOwner) && shows.length > 0 && (
+        <div style={{ padding: '12px 20px 0' }}>
+          <button
+            onClick={() => {
+              const pastIds = new Set(
+                [...shows]
+                  .filter(s => s.date < new Date().toISOString().split('T')[0])
+                  .map(s => s.id)
+              )
+              setShareSelectedIds(pastIds.size > 0 ? pastIds : new Set(shows.map(s => s.id)))
+              setShareImageUrl(null)
+              setShareImageBlob(null)
+              setShareSheetOpen(true)
+            }}
+            style={{ width: '100%', height: 40, background: '#F5F5F5', border: 'none', borderRadius: 20, fontSize: 13, fontWeight: 600, color: '#1a1a1a', cursor: 'pointer', fontFamily: SYS, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
+            </svg>
+            Compartir gira
+          </button>
         </div>
       )}
 
@@ -906,6 +949,183 @@ export default function TourClient({
             </div>
           </>
         )}
+
+        {/* ── Share sheet ── */}
+        {shareSheetOpen && (() => {
+          const sortedForShare = [...shows].sort((a, b) => a.date.localeCompare(b.date))
+          const selectedShows = sortedForShare.filter(s => shareSelectedIds.has(s.id))
+          const showsWithCoords = selectedShows.filter(s => s.venue_lat != null && s.venue_lng != null)
+          const totalKm = showsWithCoords.length >= 2
+            ? showsWithCoords.reduce((sum, s, i) => {
+                if (i === 0) return 0
+                const prev = showsWithCoords[i - 1]
+                return sum + haversine(prev.venue_lat!, prev.venue_lng!, s.venue_lat!, s.venue_lng!)
+              }, 0)
+            : 0
+
+          // tour color: index of this tour among user's tours (use TOUR_COLORS[0] as default — page doesn't pass tourIndex)
+          const cardBg = TOUR_COLORS[0]
+
+          async function generateCard() {
+            if (!cardRef.current) return
+            setShareGenerating(true)
+            try {
+              const h2c = (await import('html2canvas')).default
+              const canvas = await h2c(cardRef.current, {
+                scale: 1,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: null,
+                width: 1080,
+                height: 1920,
+                logging: false,
+              })
+              canvas.toBlob(blob => {
+                if (!blob) return
+                setShareImageBlob(blob)
+                setShareImageUrl(URL.createObjectURL(blob))
+                setShareGenerating(false)
+              }, 'image/png')
+            } catch {
+              setShareGenerating(false)
+            }
+          }
+
+          function downloadCard() {
+            if (!shareImageUrl) return
+            const a = document.createElement('a')
+            a.href = shareImageUrl
+            a.download = `tourpilot-${(initialTour.band_tag ?? initialTour.name).replace(/\s+/g, '-').toLowerCase()}.png`
+            a.click()
+          }
+
+          async function shareCard() {
+            if (!shareImageBlob) return
+            const file = new File([shareImageBlob], 'tourpilot.png', { type: 'image/png' })
+            if (navigator.canShare?.({ files: [file] })) {
+              await navigator.share({ files: [file], title: 'Mi gira en Tour Pilot' })
+            } else {
+              downloadCard()
+            }
+          }
+
+          return (
+            <>
+              <div onClick={() => { setShareSheetOpen(false); setShareImageUrl(null) }}
+                style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9998 }} />
+              <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px 40px', zIndex: 9999, maxHeight: '92vh', overflowY: 'auto' }}>
+                <p style={{ fontSize: 18, fontWeight: 700, color: '#1a1a1a', margin: '0 0 20px', fontFamily: SYS }}>Compartir gira</p>
+
+                {!shareImageUrl ? (
+                  <>
+                    {/* Show selector */}
+                    <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', margin: '0 0 10px', fontFamily: SYS }}>Shows a incluir</p>
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+                      <button onClick={() => setShareSelectedIds(new Set(sortedForShare.map(s => s.id)))} style={{ background: 'none', border: 'none', fontSize: 12, color: '#007AFF', cursor: 'pointer', fontFamily: SYS, padding: 0 }}>Todos</button>
+                      <button onClick={() => setShareSelectedIds(new Set())} style={{ background: 'none', border: 'none', fontSize: 12, color: '#007AFF', cursor: 'pointer', fontFamily: SYS, padding: 0 }}>Ninguno</button>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginBottom: 24 }}>
+                      {sortedForShare.map(s => {
+                        const checked = shareSelectedIds.has(s.id)
+                        const hasCoords = s.venue_lat != null && s.venue_lng != null
+                        return (
+                          <div key={s.id}
+                            onClick={() => setShareSelectedIds(prev => {
+                              const next = new Set(prev)
+                              if (next.has(s.id)) next.delete(s.id); else next.add(s.id)
+                              return next
+                            })}
+                            style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', cursor: 'pointer', borderBottom: '0.5px solid #F5F5F5' }}>
+                            <div style={{ width: 18, height: 18, borderRadius: 5, border: `2px solid ${checked ? '#1a1a1a' : '#D0D0D0'}`, background: checked ? '#1a1a1a' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                              {checked && <svg width="10" height="10" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="#fff" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#1a1a1a', fontFamily: SYS, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.venue_name}</p>
+                              <p style={{ margin: 0, fontSize: 12, color: '#999', fontFamily: SYS }}>{s.city} · {fmtCardDate(s.date)}</p>
+                            </div>
+                            {!hasCoords && <span style={{ fontSize: 10, color: '#DC412C', fontFamily: SYS, flexShrink: 0 }}>Sin ubicación</span>}
+                          </div>
+                        )
+                      })}
+                    </div>
+                    <button
+                      onClick={generateCard}
+                      disabled={shareGenerating || shareSelectedIds.size === 0}
+                      style={{ width: '100%', height: 48, background: '#1a1a1a', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700, color: '#fff', cursor: shareSelectedIds.size === 0 ? 'default' : 'pointer', fontFamily: SYS, opacity: shareSelectedIds.size === 0 ? 0.4 : 1 }}>
+                      {shareGenerating ? 'Generando…' : 'Generar tarjeta'}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <img src={shareImageUrl} alt="Tour card" style={{ width: '100%', borderRadius: 16, marginBottom: 16 }} />
+                    <div style={{ display: 'flex', gap: 10 }}>
+                      <button onClick={downloadCard}
+                        style={{ flex: 1, height: 48, background: '#F5F5F5', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 600, color: '#1a1a1a', cursor: 'pointer', fontFamily: SYS }}>
+                        Descargar
+                      </button>
+                      <button onClick={shareCard}
+                        style={{ flex: 1, height: 48, background: '#1a1a1a', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: SYS }}>
+                        Compartir
+                      </button>
+                    </div>
+                    <button onClick={() => setShareImageUrl(null)} style={{ width: '100%', marginTop: 10, background: 'none', border: 'none', fontSize: 13, color: '#999', cursor: 'pointer', fontFamily: SYS }}>
+                      ← Editar selección
+                    </button>
+                  </>
+                )}
+
+                {/* Hidden card for html2canvas — 1080×1920 */}
+                <div style={{ position: 'fixed', left: -9999, top: -9999, width: 1080, height: 1920, pointerEvents: 'none', overflow: 'hidden' }}>
+                  <div ref={cardRef} style={{ width: 1080, height: 1920, background: cardBg, padding: 80, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', fontFamily: SYS }}>
+                    {/* Top: logo or band name */}
+                    <div style={{ marginBottom: 60 }}>
+                      {bandLogoUrl
+                        ? <img src={bandLogoUrl} alt="logo" style={{ maxHeight: 60, objectFit: 'contain' }} crossOrigin="anonymous" />
+                        : <p style={{ margin: 0, fontSize: 28, fontWeight: 800, color: '#1a1a1a', fontFamily: SYS }}>{initialTour.band_tag ?? initialTour.name}</p>
+                      }
+                    </div>
+
+                    {/* Route */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 0 }}>
+                      {selectedShows.map((s, i) => (
+                        <div key={s.id}>
+                          <div style={{ paddingLeft: 24, borderLeft: '3px solid rgba(0,0,0,0.15)' }}>
+                            <p style={{ margin: '0 0 2px', fontSize: 32, fontWeight: 800, color: '#1a1a1a', lineHeight: 1.1, fontFamily: SYS }}>{s.venue_name}</p>
+                            <p style={{ margin: '0 0 2px', fontSize: 20, color: 'rgba(0,0,0,0.6)', fontStyle: 'italic', fontFamily: SYS }}>{s.city}</p>
+                            <p style={{ margin: 0, fontSize: 16, color: 'rgba(0,0,0,0.5)', fontFamily: SYS }}>{fmtCardDate(s.date)}</p>
+                          </div>
+                          {i < selectedShows.length - 1 && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0 12px 24px' }}>
+                              <div style={{ width: 1, height: 28, borderLeft: '2px dashed rgba(0,0,0,0.2)' }} />
+                              <span style={{ fontSize: 18, color: 'rgba(0,0,0,0.3)' }}>↓</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* KM total */}
+                    {totalKm > 0 && (
+                      <div style={{ margin: '60px 0 40px', borderTop: '1px solid rgba(0,0,0,0.1)', paddingTop: 40 }}>
+                        <p style={{ margin: 0, fontSize: 48, fontWeight: 800, color: '#1a1a1a', fontFamily: SYS, lineHeight: 1 }}>
+                          {Math.round(totalKm).toLocaleString('es-ES')} km recorridos
+                        </p>
+                        <p style={{ margin: '8px 0 0', fontSize: 20, color: 'rgba(0,0,0,0.5)', fontFamily: SYS }}>
+                          en {selectedShows.length} {selectedShows.length === 1 ? 'concierto' : 'conciertos'}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Footer */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 'auto' }}>
+                      <p style={{ margin: 0, fontSize: 14, color: 'rgba(0,0,0,0.4)', fontFamily: SYS }}>tourpilot.live</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )
+        })()}
       </Portal>
     </div>
   )
