@@ -696,10 +696,11 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
         body: JSON.stringify({ show_id: data.id, message: notifyMsg.trim(), recipient_ids: notifyRecipients }),
       })
       const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`)
       const count = json.sent ?? notifyRecipients.length
       setNotifyToast(`Notificación enviada a ${count} ${count === 1 ? 'persona' : 'personas'} ✓`)
-    } catch {
-      setNotifyToast('Error al enviar. Inténtalo de nuevo.')
+    } catch (e) {
+      setNotifyToast(`Error: ${e instanceof Error ? e.message : 'desconocido'}`)
     } finally {
       setSendingNotify(false)
       setSheetNotify(false)

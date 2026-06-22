@@ -53,13 +53,16 @@ export async function POST(req: NextRequest) {
 
   let sent = 0
 
+  const errors: string[] = []
+
   await Promise.allSettled(
     recipient_ids.map(async (rid) => {
-      const { data: authUser } = await admin.auth.admin.getUserById(rid)
+      const { data: authUser, error: authErr } = await admin.auth.admin.getUserById(rid)
+      if (authErr) { errors.push(`auth:${rid}:${authErr.message}`); return }
       const email = authUser?.user?.email
       const profile = recipientProfiles?.find(p => p.id === rid)
       const name = profile?.full_name ?? 'Miembro del equipo'
-      if (!email) return
+      if (!email) { errors.push(`no-email:${rid}`); return }
 
       const html = `<!DOCTYPE html>
 <html>
@@ -103,9 +106,9 @@ export async function POST(req: NextRequest) {
         subject,
         html,
       })
-      if (!error) sent++
+      if (error) { errors.push(`resend:${email}:${error.message}`) } else { sent++ }
     })
   )
 
-  return NextResponse.json({ success: true, sent })
+  return NextResponse.json({ success: true, sent, errors })
 }
