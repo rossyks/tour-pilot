@@ -664,9 +664,44 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
   const [sheetDir, setSheetDir] = useState(false)
   const [sheetContacts, setSheetContacts] = useState(false)
   const [sheetAddress, setSheetAddress] = useState(false)
+  const [mountedPortal, setMountedPortal] = useState(false)
+  const [sheetNotify, setSheetNotify] = useState(false)
+  const [notifyMsg, setNotifyMsg] = useState('')
+  const [notifyRecipients, setNotifyRecipients] = useState<string[]>([])
+  const [sendingNotify, setSendingNotify] = useState(false)
+  const [notifyToast, setNotifyToast] = useState<string | null>(null)
   const [editingHeader, setEditingHeader] = useState(false)
   const [headerForm, setHeaderForm] = useState({ venue_name: data.venue_name, city: data.city, date: data.date })
   const [savingHeader, setSavingHeader] = useState(false)
+
+  useEffect(() => { setMountedPortal(true) }, [])
+
+  function openNotifySheet() {
+    setNotifyMsg('')
+    setNotifyRecipients(tourMembers.map(m => m.user_id))
+    setSheetNotify(true)
+  }
+
+  async function sendNotification() {
+    if (!notifyMsg.trim() || !notifyRecipients.length) return
+    setSendingNotify(true)
+    await supabase.from('notifications').insert({
+      show_id: data.id, tour_id: tourId, created_by: userId,
+      message: notifyMsg.trim(), recipients: notifyRecipients,
+    })
+    const res = await fetch('/api/notifications/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ show_id: data.id, message: notifyMsg.trim(), recipient_ids: notifyRecipients }),
+    })
+    const json = await res.json()
+    setSendingNotify(false)
+    setSheetNotify(false)
+    setNotifyMsg('')
+    const count = json.sent ?? notifyRecipients.length
+    setNotifyToast(`Notificación enviada a ${count} ${count === 1 ? 'persona' : 'personas'} ✓`)
+    setTimeout(() => setNotifyToast(null), 3000)
+  }
 
   async function saveHeader() {
     setSavingHeader(true)
@@ -1175,6 +1210,7 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
   }
 
   return (
+    <>
     <div className="tp-page" style={{ minHeight: '100vh', background: '#fff', maxWidth: 390, margin: '0 auto', paddingBottom: 80, fontFamily: SYS }}>
 
       {/* ── Nav bar ── */}
@@ -1353,6 +1389,26 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
 
         </div>
       </div>
+
+      {/* ── Notificar equipo ── */}
+      {isAdmin && (
+        <div style={{ padding: '0 16px 12px' }}>
+          <button
+            onClick={openNotifySheet}
+            style={{
+              width: '100%', height: 40, background: '#F5F5F5', border: 'none',
+              borderRadius: 20, cursor: 'pointer', fontFamily: SYS,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+              fontSize: 13, fontWeight: 600, color: '#1a1a1a',
+            }}>
+            <svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='#1a1a1a' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+              <path d='M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9'/>
+              <path d='M13.73 21a2 2 0 0 1-3.46 0'/>
+            </svg>
+            Notificar equipo
+          </button>
+        </div>
+      )}
 
       {/* ── Rider / Docs ── */}
       <div style={{ padding: '0 16px' }}>
@@ -2169,6 +2225,78 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
         </div>
       )}
     </div>
+      {/* ── Sheet: Notificar equipo ── */}
+      {mountedPortal && createPortal(
+        sheetNotify ? (
+          <>
+            <div onClick={() => !sendingNotify && setSheetNotify(false)}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 9998, WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }} />
+            <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#fff', borderRadius: '20px 20px 0 0', padding: '24px 20px 40px', zIndex: 9999, maxHeight: '90vh', overflowY: 'auto', WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
+              <p style={{ fontSize: 18, fontWeight: 700, color: '#1a1a1a', margin: '0 0 20px', fontFamily: SYS }}>Notificar equipo</p>
+              <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', margin: '0 0 8px', fontFamily: SYS }}>Mensaje</p>
+              <textarea
+                autoFocus
+                value={notifyMsg}
+                onChange={e => setNotifyMsg(e.target.value)}
+                placeholder='Escribe tu mensaje al equipo...'
+                rows={4}
+                style={{ width: '100%', boxSizing: 'border-box' as const, background: '#F5F5F5', border: '1.5px solid transparent', borderRadius: 12, padding: 12, fontSize: 16, fontFamily: SYS, outline: 'none', resize: 'none' as const, minHeight: 100, color: '#1a1a1a', lineHeight: 1.5, transition: 'border-color 0.15s' }}
+                onFocus={e => (e.target.style.borderColor = '#1a1a1a')}
+                onBlur={e => (e.target.style.borderColor = 'transparent')}
+              />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', margin: '20px 0 10px' }}>
+                <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#999', margin: 0, fontFamily: SYS }}>Enviar a</p>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <button onClick={() => setNotifyRecipients(tourMembers.map(m => m.user_id))} style={{ background: 'none', border: 'none', fontSize: 12, color: '#007AFF', cursor: 'pointer', fontFamily: SYS, padding: 0 }}>Todos</button>
+                  <button onClick={() => setNotifyRecipients([])} style={{ background: 'none', border: 'none', fontSize: 12, color: '#007AFF', cursor: 'pointer', fontFamily: SYS, padding: 0 }}>Ninguno</button>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {tourMembers.map(m => {
+                  const checked = notifyRecipients.includes(m.user_id)
+                  const role = m.role ?? 'band'
+                  const avatarBg: Record<string, string> = { owner: '#1a1a1a', admin: '#333', band: '#A4B2DA', artist: '#A99F49', crew: '#DC412C' }
+                  const avatarTxt: Record<string, string> = { owner: '#fff', admin: '#fff', band: '#1a1a1a', artist: '#1a1a1a', crew: '#fff' }
+                  const roleLabel: Record<string, string> = { owner: 'Owner', admin: 'Admin', band: 'Banda', artist: 'Artista', crew: 'Crew' }
+                  const name = m.profiles?.full_name ?? m.profiles?.username ?? 'Miembro'
+                  const parts = name.trim().split(' ')
+                  const initials = parts.length >= 2 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : name.slice(0, 2).toUpperCase()
+                  return (
+                    <div key={m.user_id}
+                      onClick={() => setNotifyRecipients(prev => prev.includes(m.user_id) ? prev.filter(id => id !== m.user_id) : [...prev, m.user_id])}
+                      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', cursor: 'pointer', borderBottom: '0.5px solid #F5F5F5' }}>
+                      <div style={{ width: 18, height: 18, borderRadius: 5, border: `2px solid ${checked ? '#1a1a1a' : '#D0D0D0'}`, background: checked ? '#1a1a1a' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        {checked && <svg width='10' height='10' viewBox='0 0 12 12'><polyline points='2,6 5,9 10,3' stroke='#fff' strokeWidth='2' fill='none' strokeLinecap='round' strokeLinejoin='round'/></svg>}
+                      </div>
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: avatarBg[role] ?? '#999', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: avatarTxt[role] ?? '#fff', fontFamily: SYS }}>{initials}</span>
+                      </div>
+                      <span style={{ fontSize: 14, fontWeight: 500, color: '#1a1a1a', fontFamily: SYS, flex: 1 }}>{name}</span>
+                      <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.05em', color: avatarTxt[role] ?? '#fff', background: avatarBg[role] ?? '#999', borderRadius: 20, padding: '2px 8px', flexShrink: 0, fontFamily: SYS }}>{roleLabel[role] ?? role}</span>
+                    </div>
+                  )
+                })}
+              </div>
+              <button
+                onClick={sendNotification}
+                disabled={sendingNotify || !notifyMsg.trim() || !notifyRecipients.length}
+                style={{ width: '100%', height: 48, background: '#1a1a1a', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700, color: '#fff', cursor: sendingNotify || !notifyMsg.trim() || !notifyRecipients.length ? 'default' : 'pointer', fontFamily: SYS, marginTop: 20, opacity: sendingNotify || !notifyMsg.trim() || !notifyRecipients.length ? 0.4 : 1 }}>
+                {sendingNotify ? 'Enviando…' : 'Enviar'}
+              </button>
+            </div>
+          </>
+        ) : <></>,
+        document.body
+      )}
+
+      {/* ── Toast notificación ── */}
+      {mountedPortal && notifyToast && createPortal(
+        <div style={{ position: 'fixed', top: 20, left: 20, right: 20, zIndex: 10000, background: '#1a1a1a', color: '#fff', borderRadius: 16, padding: '14px 18px', fontSize: 14, fontWeight: 600, fontFamily: SYS, textAlign: 'center', boxShadow: '0 8px 32px rgba(0,0,0,0.25)', WebkitTransform: 'translateZ(0)', transform: 'translateZ(0)' }}>
+          {notifyToast}
+        </div>,
+        document.body
+      )}
+    </>
   )
 }
 
