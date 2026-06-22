@@ -685,22 +685,27 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
   async function sendNotification() {
     if (!notifyMsg.trim() || !notifyRecipients.length) return
     setSendingNotify(true)
-    await supabase.from('notifications').insert({
-      show_id: data.id, tour_id: tourId, created_by: userId,
-      message: notifyMsg.trim(), recipients: notifyRecipients,
-    })
-    const res = await fetch('/api/notifications/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ show_id: data.id, message: notifyMsg.trim(), recipient_ids: notifyRecipients }),
-    })
-    const json = await res.json()
-    setSendingNotify(false)
-    setSheetNotify(false)
-    setNotifyMsg('')
-    const count = json.sent ?? notifyRecipients.length
-    setNotifyToast(`Notificación enviada a ${count} ${count === 1 ? 'persona' : 'personas'} ✓`)
-    setTimeout(() => setNotifyToast(null), 3000)
+    try {
+      supabase.from('notifications').insert({
+        show_id: data.id, tour_id: tourId, created_by: userId,
+        message: notifyMsg.trim(), recipients: notifyRecipients,
+      }).then(() => {})
+      const res = await fetch('/api/notifications/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ show_id: data.id, message: notifyMsg.trim(), recipient_ids: notifyRecipients }),
+      })
+      const json = await res.json()
+      const count = json.sent ?? notifyRecipients.length
+      setNotifyToast(`Notificación enviada a ${count} ${count === 1 ? 'persona' : 'personas'} ✓`)
+    } catch {
+      setNotifyToast('Error al enviar. Inténtalo de nuevo.')
+    } finally {
+      setSendingNotify(false)
+      setSheetNotify(false)
+      setNotifyMsg('')
+      setTimeout(() => setNotifyToast(null), 3000)
+    }
   }
 
   async function saveHeader() {
@@ -2251,6 +2256,36 @@ export default function ShowDetail({ show, isAdmin, tourId, userId, tourMembers,
                   <button onClick={() => setNotifyRecipients([])} style={{ background: 'none', border: 'none', fontSize: 12, color: '#007AFF', cursor: 'pointer', fontFamily: SYS, padding: 0 }}>Ninguno</button>
                 </div>
               </div>
+              {/* Quick role filters */}
+              {(() => {
+                const roleGroups: { role: string; label: string; bg: string; txt: string }[] = [
+                  { role: 'band', label: 'Banda', bg: '#A4B2DA', txt: '#1a1a1a' },
+                  { role: 'artist', label: 'Artista', bg: '#A99F49', txt: '#1a1a1a' },
+                  { role: 'crew', label: 'Crew', bg: '#DC412C', txt: '#fff' },
+                ]
+                return (
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' as const }}>
+                    {roleGroups.map(({ role, label, bg, txt }) => {
+                      const ids = tourMembers.filter(m => m.role === role).map(m => m.user_id)
+                      if (!ids.length) return null
+                      const allSelected = ids.every(id => notifyRecipients.includes(id))
+                      return (
+                        <button key={role}
+                          onClick={() => {
+                            if (allSelected) {
+                              setNotifyRecipients(prev => prev.filter(id => !ids.includes(id)))
+                            } else {
+                              setNotifyRecipients(prev => [...new Set([...prev, ...ids])])
+                            }
+                          }}
+                          style={{ border: `2px solid ${bg}`, borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 700, fontFamily: SYS, cursor: 'pointer', background: allSelected ? bg : 'transparent', color: allSelected ? txt : '#1a1a1a', transition: 'all 0.15s' }}>
+                          {label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )
+              })()}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {tourMembers.map(m => {
                   const checked = notifyRecipients.includes(m.user_id)
