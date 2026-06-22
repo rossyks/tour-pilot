@@ -283,6 +283,7 @@ export default function DashboardClient({
         invite_code_band: genCode(),
         invite_code_artist: genCode(),
         invite_code_crew: genCode(),
+        invite_code_admin: genCode(),
       }).select().single()
       data = result.data
       error = result.error
@@ -328,8 +329,11 @@ export default function DashboardClient({
     const { data: byCrew } = (byBand || byArtist) ? { data: null } : await supabase
       .from('tours').select('id, name').eq('invite_code_crew', code).maybeSingle()
 
-    const matchedTour = byBand ?? byArtist ?? byCrew
-    const role: 'band' | 'artist' | 'crew' = byBand ? 'band' : byArtist ? 'artist' : 'crew'
+    const { data: byAdmin } = (byBand || byArtist || byCrew) ? { data: null } : await supabase
+      .from('tours').select('id, name').eq('invite_code_admin', code).maybeSingle()
+
+    const matchedTour = byBand ?? byArtist ?? byCrew ?? byAdmin
+    const role: 'band' | 'artist' | 'crew' | 'admin' = byBand ? 'band' : byArtist ? 'artist' : byCrew ? 'crew' : 'admin'
 
     if (!matchedTour) { setJoinError('Código inválido'); setJoining(false); return }
 
@@ -353,7 +357,7 @@ export default function DashboardClient({
     })
     if (memberError) { setJoinError('No se pudo unir, inténtalo de nuevo'); setJoining(false); return }
 
-    const roleLabel = role === 'band' ? 'Banda' : role === 'artist' ? 'Artista' : 'Crew'
+    const roleLabel = role === 'band' ? 'Banda' : role === 'artist' ? 'Artista' : role === 'crew' ? 'Crew' : 'Administrador'
     setJoining(false)
     setJoinOpen(false)
     setJoinCode('')

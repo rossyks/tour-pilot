@@ -125,7 +125,7 @@ function SwipeDeleteRow({
 export default function TourClient({
   tour: initialTour, shows: initialShows, travelDays: initialTravelDays, isAdmin, isOwner, tourMembers: initialTourMembers, userId,
 }: {
-  tour: { id: string; name: string; band_tag: string | null; invite_code_band: string | null; invite_code_artist: string | null; invite_code_crew: string | null; owner_id: string | null; band_logo_url: string | null }
+  tour: { id: string; name: string; band_tag: string | null; invite_code_band: string | null; invite_code_artist: string | null; invite_code_crew: string | null; invite_code_admin: string | null; owner_id: string | null; band_logo_url: string | null }
   shows: Show[]
   travelDays: TravelDay[]
   isAdmin: boolean
@@ -141,6 +141,7 @@ export default function TourClient({
   const [travelDays, setTravelDays] = useState<TravelDay[]>(initialTravelDays)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [teamSheetOpen, setTeamSheetOpen] = useState(false)
+  const [copiedAdmin, setCopiedAdmin] = useState(false)
   const [copiedBand, setCopiedBand] = useState(false)
   const [copiedArtist, setCopiedArtist] = useState(false)
   const [copiedCrew, setCopiedCrew] = useState(false)
@@ -803,6 +804,24 @@ export default function TourClient({
               {/* Códigos fijos */}
               <p style={{ fontWeight: 700, fontSize: 13, color: '#999', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 4px 0', fontFamily: SYS }}>Invitar al equipo</p>
               <p style={{ fontSize: 13, color: '#999', margin: '0 0 20px', fontFamily: SYS }}>Comparte este código para que se unan</p>
+
+              {/* Código Admin */}
+              <div style={{ background: '#1a1a1a', borderRadius: 14, padding: '16px', marginBottom: 12 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#fff', margin: '0 0 4px', fontFamily: SYS }}>Código Admin</p>
+                <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', margin: '0 0 10px', fontFamily: SYS }}>Da acceso completo de administrador a la gira</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                  <span style={{ fontSize: 28, fontWeight: 800, letterSpacing: '0.3em', color: '#fff', fontFamily: 'monospace' }}>
+                    {initialTour.invite_code_admin ?? '—'}
+                  </span>
+                  {initialTour.invite_code_admin && (
+                    <button
+                      onClick={() => copyToClipboard(initialTour.invite_code_admin!, () => { setCopiedAdmin(true); setTimeout(() => setCopiedAdmin(false), 2000) })}
+                      style={{ height: 36, padding: '0 16px', background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 600, color: copiedAdmin ? '#2ECC71' : '#fff', cursor: 'pointer', fontFamily: SYS, transition: 'color 0.2s', flexShrink: 0, whiteSpace: 'nowrap' }}>
+                      {copiedAdmin ? '¡Copiado! ✓' : 'Copiar'}
+                    </button>
+                  )}
+                </div>
+              </div>
 
               {/* Código Artista */}
               <div style={{ background: '#F5F5F5', borderRadius: 14, padding: '16px', marginBottom: 12 }}>
