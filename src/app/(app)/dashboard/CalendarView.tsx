@@ -164,7 +164,7 @@ export default function CalendarView({ tours, shows, travelDays }: Props) {
                   transition: 'opacity 0.15s',
                 }}
               >
-                {tour.name}
+                {tour.band_tag ?? tour.name}
               </button>
             )
           })}

@@ -604,9 +604,9 @@ export default function DashboardClient({
                     placeholder="Nombre de la gira" required style={sheetInputStyle} />
                 </div>
                 <div>
-                  <p style={{ fontSize: 11, color: '#999', margin: '0 0 6px 0', fontFamily: SYS, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Artista / Banda</p>
+                  <p style={{ fontSize: 11, color: '#999', margin: '0 0 6px 0', fontFamily: SYS, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Artista / Banda *</p>
                   <input value={form.band_tag} onChange={e => setForm(f => ({ ...f, band_tag: e.target.value }))}
-                    placeholder="Nombre del artista (opcional)" style={sheetInputStyle} />
+                    placeholder="Nombre del artista o banda" required style={sheetInputStyle} />
                 </div>
                 <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
                   <button type="button"
